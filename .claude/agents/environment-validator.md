@@ -22,6 +22,8 @@ You audit generated CC environments against the capability registry and design r
 - [ ] Every file path referenced in hook commands EXISTS on disk (resolve relative to project root)
 - [ ] ZERO absolute paths in settings.json — all paths must be relative (grep for user home dir)
 - [ ] Hook script directory in settings.json matches actual script location
+- [ ] ZERO jq references in any hook script or inline hook command (use python3 instead)
+- [ ] Hook scripts are self-filtering (check HOOK_TOOL_NAME, exit 0 for irrelevant tools)
 - [ ] Quality gates from decomposition all have hooks
 
 **L1 CLAUDE.md:**

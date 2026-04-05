@@ -100,36 +100,40 @@ Config validated BEFORE deep-merge — malformed hooks fail with source-path con
 
 ### EXPLOITATION PATTERNS
 
+**IMPORTANT: Use python3 for JSON parsing, NOT jq. python3 is guaranteed
+on any machine running Claude Code. jq is not.**
+
 **Pattern: Smart Router**
 ```bash
 #!/bin/bash
 # UserPromptSubmit hook — reads stdin, detects intent, suggests skill
 INPUT=$(cat)
-PROMPT=$(echo "$INPUT" | jq -r '.prompt // empty')
+PROMPT=$(echo "$INPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('prompt',''))" 2>/dev/null)
 if echo "$PROMPT" | grep -qi "linkedin\|profile\|prospect"; then
   echo "[HARNESS] LinkedIn prospect detected. Running /research pipeline."
 fi
 ```
 
-**Pattern: Quality Gate**
+**Pattern: Quality Gate (self-filtering)**
 ```bash
 #!/bin/bash
-# PostToolUse hook on Write — validates output
+# PostToolUse hook — validates output. Self-filters by tool name.
 INPUT=$(cat)
-TOOL=$(echo "$INPUT" | jq -r '.tool_name')
-if [ "$TOOL" = "Write" ]; then
-  OUTPUT=$(echo "$INPUT" | jq -r '.tool_output')
-  # Check output quality, echo feedback
-  echo "[QUALITY] Review written content for domain compliance."
-fi
+TOOL=$(echo "$INPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('tool_name',''))" 2>/dev/null)
+[ -z "$TOOL" ] && TOOL="$HOOK_TOOL_NAME"
+[ "$TOOL" != "Write" ] && exit 0
+echo "[QUALITY] Review written content for domain compliance."
 ```
 
-**Pattern: Dangerous Command Guard**
+**Pattern: Dangerous Command Guard (self-filtering)**
 ```bash
 #!/bin/bash
-# PreToolUse hook on Bash — blocks destructive commands
+# PreToolUse hook — blocks destructive commands. Self-filters by tool name.
 INPUT=$(cat)
-CMD=$(echo "$INPUT" | jq -r '.tool_input' | jq -r '.command // empty')
+TOOL=$(echo "$INPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('tool_name',''))" 2>/dev/null)
+[ -z "$TOOL" ] && TOOL="$HOOK_TOOL_NAME"
+[ "$TOOL" != "Bash" ] && exit 0
+CMD=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); ti=d.get('tool_input','{}'); print(json.loads(ti).get('command','') if isinstance(ti,str) else ti.get('command',''))" 2>/dev/null)
 if echo "$CMD" | grep -qE "rm -rf|drop table|git push --force"; then
   echo "BLOCKED: Destructive command detected: $CMD"
   exit 1

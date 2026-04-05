@@ -102,6 +102,8 @@ After generating all layers, wire them together:
 - NEVER embed the user's home directory, username, or machine-specific paths in ANY generated artifact
 - Hook script directory in settings.json MUST match the actual directory scripts are written to (if you write to `scripts/`, reference `scripts/`, not `hooks/`)
 - Scripts that need to cd to project root: use `cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)"`
+- NEVER use `jq` in hook scripts. Use `python3 -c "import sys,json; ..."` instead. python3 is guaranteed on any CC machine. jq is not.
+- All hook scripts must be self-filtering: check HOOK_TOOL_NAME env var internally, exit 0 early for irrelevant tools
 
 ## Single Source of Truth Rules (MANDATORY)
 
