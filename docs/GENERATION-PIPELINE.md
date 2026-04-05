@@ -126,6 +126,13 @@ Checks:
                                   └───────────────┬──────────────────┘
                                                   │
                                   ┌───────────────▼──────────────────┐
+                                  │        GOOSE REVIEW               │
+                                  │  (cold perspective: invoke         │
+                                  │   claude.exe.goose -p as fresh     │
+                                  │   code reviewer on the output)     │
+                                  └───────────────┬──────────────────┘
+                                                  │
+                                  ┌───────────────▼──────────────────┐
                                   │          ASSEMBLE                 │
                                   │         (serial)                  │
                                   └──────────────────────────────────┘
@@ -138,10 +145,17 @@ Each stage is implemented as a custom agent that reads the registry and template
 
 ## Validation Philosophy
 
-Two-phase validation:
+Three-phase validation:
 1. **VALIDATE** (static) — checks form: schemas, frontmatter, cross-references, coverage
 2. **SMOKE TEST** (dynamic) — checks function: executes scripts, resolves paths, verifies deps
+3. **GOOSE REVIEW** (perspective) — checks output with fresh eyes: invokes `claude.exe.goose -p`
+   as a cold code reviewer with no session context. Different context = different catches.
 
 Static validation catches structural errors (missing frontmatter, broken cross-refs).
 Smoke testing catches runtime errors (wrong paths, missing binaries, unparseable JSON).
-Both must pass before assembly.
+Goose review catches perspective errors (things the generator missed because of context bias).
+
+Proven: cold goose found 9 bugs the session-aware validator missed, including empty
+agent files, jq scope holes in inline hooks, and stale assembled output.
+
+All three must pass before assembly.

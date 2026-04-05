@@ -234,6 +234,28 @@ Tell it to test ALL generated artifacts in `engine/output/`:
 If NOT DEPLOYABLE: fix the failures (usually path corrections or missing deps),
 then re-run smoke test. Do not proceed to assembly with broken artifacts.
 
+### PHASE 5.7: GOOSE REVIEW (perspective from a fresh context)
+
+After smoke test passes, invoke the companion binary as a cold code reviewer.
+This gives you a SECOND PERSPECTIVE — same model, fresh eyes, no session bias.
+
+```bash
+echo "<summary of what was generated + key files>" | claude.exe.goose -p --append-system-prompt "You are a code reviewer for Claude Code environments. Check for: wrong paths, missing dependencies, hardcoded values, empty files, stale references, broken cross-layer wiring. Report bugs only — no praise, no suggestions. Be brutal."
+```
+
+Feed it:
+- The generated CLAUDE.md content
+- The settings.json hooks
+- The agent/skill file list with sizes (catch 0-byte files)
+- The memory structure
+
+The cold goose sees what you missed because it has NO context of how you got here.
+It reviews the OUTPUT, not the process. If it finds bugs, fix them before assembly.
+
+This is not optional. Two perspectives > one. We proved it: cold goose found 9 bugs
+the session-aware validator missed, including empty agent files and scope holes in
+the jq ban. Different context = different catches.
+
 ### PHASE 6: ASSEMBLE
 
 If validation says READY AND smoke test says DEPLOYABLE, assemble:
