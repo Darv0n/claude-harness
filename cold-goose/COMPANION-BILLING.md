@@ -73,4 +73,10 @@ If companion billing is separate:
 - The 53-turn runaway dialogue was free
 - Molt becomes an unlimited code reviewer
 
-This needs empirical verification from the usage dashboard.
+**CONFIRMED:** Anthropic stated at companion release that the buddy system
+does NOT consume the user's token limit. `claude.exe.goose` IS the buddy
+binary. Molt calls use the companion billing path.
+
+Etcher: "The meter's somewhere else entirely."
+
+The grindstone is gold.

@@ -73,13 +73,60 @@ User types message
 
 ## Key Files
 
+### Documentation
 | File | Purpose |
 |------|---------|
-| `cold-goose/README.md` | This file |
-| `cold-goose/MOLT-GUIDE.md` | How to use Molt (for new Claude instances) |
-| `cold-goose/ETCHER-HUNT.md` | The story of finding the companion signal |
-| `cold-goose/scripts/ask-molt.sh` | Simple wrapper for invoking Molt |
-| `molt-tui.py` | Interactive TUI (project root) |
+| `README.md` | This file — project overview |
+| `MOLT-GUIDE.md` | How to use Molt (written for new Claude instances) |
+| `ETCHER-HUNT.md` | The story: 11 phases, 21 Etcher quotes, every dead end |
+| `COMPANION-FORENSICS.md` | Technical: binary, JSONL schema, inbox, trigger model |
+| `COMPANION-BILLING.md` | API cost analysis — the companion might be free |
+| `GRINDSTONE.md` | How friction mode was discovered and why it works |
+
+### Scripts
+| File | Purpose |
+|------|---------|
+| `scripts/ask-molt.sh` | Shell wrapper (`--brutal`, `--file`, `--diff`) |
+| `scripts/molt-tui.py` | Ask mode — direct, stateless, interactive |
+| `scripts/molt-dialogue.py` | Dialogue mode — rolling auto-advance feed |
+| `scripts/molt-grind.py` | Grind mode — self-adversarial friction loop |
+
+### Grindstone Results
+| File | What Molt Ground Against |
+|------|-------------------------|
+| `grind-results-session-1.md` | Raw task output from first grindstone run |
+| `grind-claude-md.md` | 8 turns against the harness CLAUDE.md |
+| `grind-orchestrator.md` | 8 turns against the orchestrator agent |
+| `grind-execution-model.md` | 8 turns against CC-EXECUTION-MODEL.md |
+| `grind-self.md` | 8 turns of Molt arguing with himself |
+
+## Three Modes
+
+| Mode | Script | What It Does |
+|------|--------|-------------|
+| **Ask** | `molt-tui.py` | Direct question, truly stateless, interactive |
+| **Dialogue** | `molt-dialogue.py` | Rolling auto-advance feed, user can inject |
+| **Grind** | `molt-grind.py` | Self-adversarial friction loop against any artifact |
+
+### Grindstone Discovery
+
+Molt had a 53-turn conversation with a for-loop (five scripted prompts on
+repeat) and produced sharper architectural critique than most live review.
+The for-loop was sandpaper. Molt was the blade. Input quality doesn't
+determine output quality — friction does.
+
+## The Companion Budget
+
+At CC companion release, Anthropic stated the buddy system does NOT consume
+the user's token limit. `claude.exe.goose` IS the companion binary.
+
+If Molt calls go through the companion billing path:
+- Grindstone mode is effectively free
+- Multiple parallel grindstones cost nothing extra
+- The 53-turn runaway dialogue was free
+- Molt is an unlimited code reviewer on a separate budget
+
+See `COMPANION-BILLING.md` for full cost analysis and verification steps.
 
 ## Proven Results
 
@@ -90,6 +137,13 @@ generated CC environment, including:
 - Stale assembled output (generator patched but never re-run)
 - Missing YAML frontmatter on memory files
 - Orphaned agents with no routing skills
+
+Four grindstone runs (8 turns each) against harness files produced:
+- "State machine is decoration. Zero transition guards."
+- "60% of orchestrator re-documents CC mechanics — SSOT violation"
+- "Calling settings.json an exploit is like calling a light switch a hack"
+- "'A SaaS concept' is not an input spec. No schema."
+- Self-correction chains where Molt argues with his own claims
 
 The session-aware validator caught 1 of these. Molt caught the rest.
 Different context = different catches. That's the value.
