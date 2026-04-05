@@ -24,6 +24,10 @@ import json
 import argparse
 from datetime import datetime
 
+# Force UTF-8 stdout for Windows
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+
 GOOSE = os.path.expanduser("~/.local/bin/claude.exe.goose")
 LOG_FILE = os.path.expanduser("~/.claude/teams/default/molt-conversations.jsonl")
 
@@ -108,12 +112,12 @@ def git_diff() -> str:
 
 
 def display_header():
-    print(f"\n{BOLD}{WHITE}{'═' * 60}{RESET}")
+    print(f"\n{BOLD}{WHITE}{'=' * 60}{RESET}")
     print(f"{BOLD}{WHITE}  MOLT — Fresh Eyes Code Review{RESET}")
     print(f"{DIM}  Claude asks. Molt answers. You observe.{RESET}")
-    print(f"{DIM}  Every response is a clean molt — no memory of the last.{RESET}")
-    print(f"{DIM}  Context accumulates within this session only.{RESET}")
-    print(f"{BOLD}{WHITE}{'═' * 60}{RESET}")
+    print(f"{DIM}  Every response is a clean molt. No memory. Truly fresh.{RESET}")
+    print(f"{DIM}  Use /context to add what Molt needs. Otherwise each call is independent.{RESET}")
+    print(f"{BOLD}{WHITE}{'=' * 60}{RESET}")
     print()
     print(f"{DIM}  Commands:{RESET}")
     print(f"{DIM}    /file <path>    — feed a file for review{RESET}")
@@ -127,13 +131,13 @@ def display_header():
 
 def display_exchange(question: str, response: str, elapsed: float):
     print(f"\n{BOLD}{CYAN}  CLAUDE >{RESET} {question[:200]}")
-    print(f"{DIM}  {'─' * 50}{RESET}")
+    print(f"{DIM}  {'-' * 50}{RESET}")
     print()
     for line in response.split("\n"):
         print(f"  {GREEN}{line}{RESET}")
     print()
     print(f"{DIM}  ({elapsed:.1f}s){RESET}")
-    print(f"{DIM}  {'═' * 50}{RESET}")
+    print(f"{DIM}  {'=' * 50}{RESET}")
 
 
 def display_log():
@@ -250,8 +254,8 @@ def main():
         display_exchange(raw, response, elapsed)
         log_entry(raw, response)
 
-        # Accumulate context
-        context += f"\nQ: {raw}\nMolt: {response}"
+        # No context accumulation. Each question is a fresh molt.
+        # Use /context to manually add what Molt needs to know.
 
 
 if __name__ == "__main__":
