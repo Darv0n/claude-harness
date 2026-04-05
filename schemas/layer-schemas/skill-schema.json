@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SkillDefinition",
+  "description": "Claude Code skill (slash command) frontmatter and body",
+  "type": "object",
+  "required": ["name", "description", "body"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Skill name (invoked as /name)"
+    },
+    "description": {
+      "type": "string",
+      "description": "When this skill should trigger — CC uses this to match user intent"
+    },
+    "args": {
+      "type": "string",
+      "description": "Expected arguments format"
+    },
+    "body": {
+      "type": "string",
+      "description": "The skill's instructions — tells CC exactly what to do when invoked"
+    },
+    "tools_used": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Which CC tools this skill typically invokes"
+    },
+    "agents_spawned": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Which custom agents this skill may spawn"
+    },
+    "memory_reads": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Which memory files this skill reads"
+    },
+    "memory_writes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Which memory files this skill writes/updates"
+    },
+    "hooks_triggered": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Which hooks fire as a result of this skill's actions"
+    }
+  },
+  "design_principles": {
+    "progressive_disclosure": "Start with the minimum needed, expand based on context",
+    "separation": "Skills define WHAT to do. Agents define WHO does it. Never mix.",
+    "composability": "Skills should be composable — one skill can invoke another"
+  }
+}

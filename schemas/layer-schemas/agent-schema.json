@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentDefinition",
+  "description": "Claude Code custom agent frontmatter and body",
+  "type": "object",
+  "required": ["name", "model", "tools", "role", "body"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Agent filename (without .md extension), hyphenated"
+    },
+    "model": {
+      "enum": ["opus", "sonnet", "haiku"],
+      "description": "Model to use for this agent. opus=heavy reasoning, sonnet=balanced, haiku=fast+cheap"
+    },
+    "tools": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tools this agent can access (e.g., WebSearch, Read, Write, Bash, Agent)"
+    },
+    "role": {
+      "type": "string",
+      "description": "One-line description of what this agent does (used for routing)"
+    },
+    "when_to_use": {
+      "type": "string",
+      "description": "Description field in the agent — tells CC when to spawn this agent"
+    },
+    "body": {
+      "type": "string",
+      "description": "The agent's system prompt / persona definition"
+    },
+    "cost_tier": {
+      "enum": ["heavy", "medium", "light"],
+      "description": "Budget category. Heavy=opus for complex reasoning, Light=haiku for high-volume tasks"
+    },
+    "jobs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Discrete tasks this agent performs"
+    }
+  },
+  "model_selection_guide": {
+    "opus": "Complex reasoning, nuanced judgment, creative generation, architecture decisions",
+    "sonnet": "Research, analysis, code generation, balanced quality/cost",
+    "haiku": "High-volume operations, simple transforms, status tracking, data extraction"
+  }
+}

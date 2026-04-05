@@ -1,0 +1,77 @@
+{
+  "_meta": {
+    "description": "Claude Code plugin system registry. Source-verified from claw-code.",
+    "version": "1.0.0",
+    "source": "apps/claw-code/rust/crates/plugins/src/lib.rs + hooks.rs",
+    "last_updated": "2026-04-05"
+  },
+  "plugin_types": {
+    "Builtin": { "marketplace": "builtin", "description": "Internal plugins" },
+    "Bundled": { "marketplace": "bundled", "description": "Shipped with CLI" },
+    "External": { "marketplace": "external", "description": "User-installed" }
+  },
+  "manifest_format": {
+    "location": ".claude-plugin/plugin.json",
+    "schema": {
+      "name": "string",
+      "version": "string (semver)",
+      "description": "string",
+      "defaultEnabled": "boolean",
+      "permissions": ["read", "write", "execute"],
+      "hooks": {
+        "PreToolUse": ["./hooks/pre.sh"],
+        "PostToolUse": ["./hooks/post.sh"],
+        "PostToolUseFailure": ["./hooks/error.sh"]
+      },
+      "lifecycle": {
+        "Init": ["./scripts/init.sh"],
+        "Shutdown": ["./scripts/shutdown.sh"]
+      },
+      "tools": [
+        {
+          "name": "tool-name",
+          "description": "Tool description",
+          "inputSchema": {},
+          "command": "./tools/my-tool",
+          "args": ["--flag"],
+          "requiredPermission": "read-only|workspace-write|danger-full-access"
+        }
+      ],
+      "commands": [
+        {
+          "name": "cmd-name",
+          "description": "Command description",
+          "command": "./commands/my-cmd"
+        }
+      ]
+    }
+  },
+  "plugin_tool_execution": {
+    "source_file": "plugins/src/lib.rs:267-345",
+    "env_vars_passed": {
+      "CLAWD_PLUGIN_ID": "Plugin identifier",
+      "CLAWD_PLUGIN_NAME": "Plugin name",
+      "CLAWD_TOOL_NAME": "Tool being invoked",
+      "CLAWD_TOOL_INPUT": "JSON input to the tool",
+      "CLAWD_PLUGIN_ROOT": "Plugin root directory (if available)"
+    },
+    "execution": "Subprocess spawn with env vars and stdin"
+  },
+  "lifecycle_events": {
+    "Init": "Run at plugin initialization (session start)",
+    "Shutdown": "Run at plugin shutdown (session end)"
+  },
+  "installation_locations": {
+    "user": "~/.claw/plugins/ or ~/.claude/plugins/",
+    "project": ".claw/plugins/ or .claude/plugins/",
+    "bundled": "<cli-binary>/plugins/"
+  },
+  "slash_commands": [
+    "/plugin list",
+    "/plugin install <path>",
+    "/plugin enable <name>",
+    "/plugin disable <name>",
+    "/plugin uninstall <id>",
+    "/plugin update <id>"
+  ]
+}

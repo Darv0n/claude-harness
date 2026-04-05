@@ -1,0 +1,84 @@
+{
+  "_meta": {
+    "description": "Claude Code custom agent system registry. Frontmatter format, model options, tool access.",
+    "version": "1.0.0",
+    "source": "apps/claw-code/src/",
+    "last_updated": "2026-04-05"
+  },
+  "agent_definition": {
+    "location": "~/.claude/agents/*.md or .claude/agents/*.md",
+    "format": "Markdown with YAML frontmatter",
+    "frontmatter_fields": {
+      "model": {
+        "type": "string",
+        "required": false,
+        "options": ["opus", "sonnet", "haiku"],
+        "description": "Model to use. Defaults to parent's model if omitted."
+      },
+      "tools": {
+        "type": "array",
+        "required": false,
+        "description": "Tools this agent can access. All tools if omitted.",
+        "common_sets": {
+          "research": ["WebSearch", "WebFetch", "Read", "Write"],
+          "writer": ["Read", "Write", "Edit"],
+          "operator": ["Bash", "Read", "Write", "TaskCreate"],
+          "orchestrator": ["Agent", "Read", "Write", "SendMessage"],
+          "analyst": ["Read", "Grep", "Glob", "Write"]
+        }
+      },
+      "description": {
+        "type": "string",
+        "required": true,
+        "description": "When to use this agent. CC uses this for automatic agent selection. CRITICAL field."
+      }
+    },
+    "body": "Markdown content that becomes the agent's system prompt / persona"
+  },
+  "spawning": {
+    "tool": "Agent",
+    "parameters": {
+      "subagent_type": "Maps to agent filename (without .md)",
+      "prompt": "Task-specific instructions (agent has NO prior context)",
+      "model": "Overrides frontmatter model",
+      "mode": "Permission mode for the agent",
+      "run_in_background": "Async execution",
+      "isolation": "'worktree' for isolated git copy",
+      "name": "Addressable name for SendMessage"
+    },
+    "execution_modes": {
+      "foreground": "Blocks until agent completes. Use when result needed immediately.",
+      "background": "Async execution. Notified on completion. Use for independent work.",
+      "parallel": "Multiple Agent calls in single message. Use for independent tasks."
+    }
+  },
+  "model_selection_guide": {
+    "opus": {
+      "cost": "$$$",
+      "strengths": "Complex reasoning, nuanced judgment, creative generation, architecture",
+      "use_for": "Critical decisions, creative writing, complex analysis",
+      "avoid_for": "Simple transforms, high-volume operations, status checks"
+    },
+    "sonnet": {
+      "cost": "$$",
+      "strengths": "Balanced quality/cost, research, code generation, analysis",
+      "use_for": "Most analytical tasks, research, moderate-complexity work",
+      "avoid_for": "Tasks requiring deep reasoning OR simple data transforms"
+    },
+    "haiku": {
+      "cost": "$",
+      "strengths": "Fast, cheap, good for simple tasks at volume",
+      "use_for": "Status tracking, data extraction, simple transforms, high-volume ops",
+      "avoid_for": "Creative work, complex reasoning, nuanced judgment"
+    }
+  },
+  "design_principles": [
+    "One clear specialization per agent",
+    "Agents define WHO (persona/expertise), not WHAT (task steps)",
+    "Minimal tool access — only what the agent needs",
+    "Description field is the routing mechanism — make it precise",
+    "Jobs should be enumerable — if the list is unbounded, the agent is too broad",
+    "Model selection must match cognitive load",
+    "Coordination must be explicit (reads/writes/spawns)"
+  ]
+}

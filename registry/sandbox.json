@@ -1,0 +1,38 @@
+{
+  "_meta": {
+    "description": "Claude Code sandbox and isolation system. Source-verified from claw-code.",
+    "version": "1.0.0",
+    "source": "apps/claw-code/rust/crates/runtime/src/sandbox.rs",
+    "last_updated": "2026-04-05"
+  },
+  "filesystem_isolation_modes": {
+    "Off": "No filesystem isolation. Full access.",
+    "WorkspaceOnly": "Can only access the workspace directory tree.",
+    "AllowList": "Only allowed mounts accessible."
+  },
+  "sandbox_config": {
+    "enabled": "boolean — master switch",
+    "namespace_restrictions": "boolean — OS-level namespace isolation",
+    "network_isolation": "boolean — block network access",
+    "filesystem_mode": "Off | WorkspaceOnly | AllowList",
+    "allowed_mounts": ["array of paths accessible in AllowList mode"]
+  },
+  "container_detection": {
+    "checks": [
+      "/.dockerenv file existence",
+      "/run/.containerenv file existence",
+      "/proc/1/cgroup container markers"
+    ],
+    "detects": ["Docker", "Podman", "Kubernetes"],
+    "fallback": "Graceful on non-Linux systems"
+  },
+  "settings_format": {
+    "sandbox": {
+      "enabled": true,
+      "namespaceRestrictions": true,
+      "networkIsolation": false,
+      "filesystemMode": "workspace-only",
+      "allowedMounts": ["/mnt/data"]
+    }
+  }
+}

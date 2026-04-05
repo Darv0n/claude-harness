@@ -1,0 +1,77 @@
+{
+  "_meta": {
+    "description": "Claude Code session management, compaction, and recovery. Source-verified.",
+    "version": "1.0.0",
+    "source": "apps/claw-code/rust/crates/runtime/src/session.rs + compact.rs + recovery_recipes.rs",
+    "last_updated": "2026-04-05"
+  },
+  "session_persistence": {
+    "source_file": "runtime/src/session.rs:73-145",
+    "format": "JSONL (one message per line)",
+    "locations": {
+      "managed": "~/.claw/sessions/",
+      "project_local": ".claw/sessions/"
+    },
+    "rotation": {
+      "threshold": "256KB per file",
+      "keep": "last 3 files"
+    },
+    "session_id_format": "session_<timestamp>",
+    "supports_forking": true,
+    "fork_struct": {
+      "parent_session_id": "string",
+      "branch_name": "string (optional)"
+    }
+  },
+  "conversation_message": {
+    "roles": ["System", "User", "Assistant", "Tool"],
+    "content_blocks": {
+      "Text": { "text": "string" },
+      "ToolUse": { "id": "string", "name": "string", "input": "string" },
+      "ToolResult": { "tool_use_id": "string", "tool_name": "string", "output": "string", "is_error": "boolean" }
+    },
+    "includes_usage": true
+  },
+  "auto_compaction": {
+    "source_file": "runtime/src/compact.rs",
+    "trigger": "Input tokens exceed threshold",
+    "default_threshold": 100000,
+    "env_var": "CLAUDE_CODE_AUTO_COMPACT_INPUT_TOKENS",
+    "strategy": "Compress middle section, keep most recent + pinned messages",
+    "result": {
+      "removed_message_count": "number",
+      "summary": "AI-generated summary of removed content"
+    }
+  },
+  "recovery_recipes": {
+    "source_file": "runtime/src/recovery_recipes.rs",
+    "failure_scenarios": [
+      "ToolTimeout",
+      "BashCommandFailed",
+      "FileNotFound",
+      "PermissionDenied",
+      "McpServerDown",
+      "RateLimited",
+      "ContextWindowExceeded"
+    ],
+    "recipe_structure": {
+      "scenario": "FailureScenario enum",
+      "steps": "array of RecoveryStep",
+      "timeout": "Duration"
+    },
+    "recovery_step": {
+      "action": "RecoveryAction",
+      "retry_count": "number",
+      "backoff": "Duration"
+    },
+    "philosophy": "Recovery before escalation — known failures auto-heal once before asking for help"
+  },
+  "slash_commands": [
+    "/session list",
+    "/session switch <id>",
+    "/session fork [branch-name]",
+    "/resume [session-path]",
+    "/compact",
+    "/clear"
+  ]
+}

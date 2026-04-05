@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HarnessInput",
+  "description": "Input specification for generating a Claude Code environment",
+  "type": "object",
+  "required": ["domain", "concept"],
+  "properties": {
+    "domain": {
+      "type": "string",
+      "description": "The SaaS domain category (e.g., 'sales-outreach', 'devops', 'analytics')"
+    },
+    "concept": {
+      "type": "string",
+      "description": "Natural language description of the SaaS concept and its core workflows"
+    },
+    "personas": {
+      "type": "array",
+      "description": "Target user personas who will operate this CC environment",
+      "items": {
+        "type": "object",
+        "required": ["role", "responsibilities"],
+        "properties": {
+          "role": { "type": "string" },
+          "responsibilities": { "type": "array", "items": { "type": "string" } },
+          "expertise_level": { "enum": ["beginner", "intermediate", "advanced", "expert"] }
+        }
+      }
+    },
+    "workflows": {
+      "type": "array",
+      "description": "Core workflows the environment must support",
+      "items": {
+        "type": "object",
+        "required": ["name", "description"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "trigger": { "type": "string", "description": "What initiates this workflow" },
+          "steps": { "type": "array", "items": { "type": "string" } },
+          "outputs": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "integrations": {
+      "type": "array",
+      "description": "External services the environment needs to interact with",
+      "items": {
+        "type": "object",
+        "required": ["service"],
+        "properties": {
+          "service": { "type": "string" },
+          "operations": { "type": "array", "items": { "type": "string" } },
+          "mcp_available": { "type": "boolean" }
+        }
+      }
+    },
+    "state_entities": {
+      "type": "array",
+      "description": "Domain entities that must be tracked across sessions",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "fields": { "type": "array", "items": { "type": "string" } },
+          "lifecycle": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "quality_gates": {
+      "type": "array",
+      "description": "Quality checks that must pass before outputs are finalized",
+      "items": {
+        "type": "object",
+        "required": ["name", "criteria"],
+        "properties": {
+          "name": { "type": "string" },
+          "criteria": { "type": "array", "items": { "type": "string" } },
+          "enforcement": { "enum": ["hook", "skill", "agent", "manual"] }
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "description": "Hard constraints on the generated environment",
+      "properties": {
+        "max_agents": { "type": "integer", "description": "Maximum number of custom agents" },
+        "preferred_models": {
+          "type": "object",
+          "properties": {
+            "heavy": { "enum": ["opus", "sonnet", "haiku"] },
+            "medium": { "enum": ["opus", "sonnet", "haiku"] },
+            "light": { "enum": ["opus", "sonnet", "haiku"] }
+          }
+        },
+        "budget_sensitivity": { "enum": ["low", "medium", "high"] },
+        "focus_layers": {
+          "type": "array",
+          "items": { "enum": ["hooks", "claude-md", "skills", "agents", "memory", "mcp"] }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "_meta": {
+    "description": "Claude Code slash commands catalog. Source-verified from claw-code.",
+    "version": "1.0.0",
+    "source": "apps/claw-code/rust/crates/commands/src/lib.rs:52-800+",
+    "last_updated": "2026-04-05"
+  },
+  "command_count": "60+",
+  "categories": {
+    "session_management": [
+      "/help — Show help",
+      "/status — Show session status",
+      "/sandbox — Show sandbox status",
+      "/compact — Compress conversation history",
+      "/clear — Clear conversation",
+      "/version — Show version",
+      "/export [file] — Export session",
+      "/resume [session] — Resume saved session",
+      "/session [list|switch|fork] — Session management"
+    ],
+    "model_and_permissions": [
+      "/model [name] — Show or switch model",
+      "/permissions [mode] — Show or set permission mode",
+      "/cost — Show cost breakdown",
+      "/usage — Show API usage statistics",
+      "/tokens — Show token count",
+      "/cache — Show prompt cache statistics"
+    ],
+    "configuration": [
+      "/config [section] — Show configuration",
+      "/memory — Show memory status",
+      "/diff — Show file diffs",
+      "/init — Initialize project",
+      "/mcp [list|show|help] — MCP server management"
+    ],
+    "code_and_project": [
+      "/bughunter [scope] — Find bugs",
+      "/commit — Create git commit",
+      "/pr [context] — Create pull request",
+      "/issue [context] — Create GitHub issue",
+      "/review [scope] — Code review"
+    ],
+    "planning": [
+      "/plan [on|off] — Toggle plan mode",
+      "/ultraplan [task] — Deep planning",
+      "/tasks [list|get|stop] — Task management",
+      "/teleport [symbol] — Navigate to symbol"
+    ],
+    "plugins_and_extensions": [
+      "/plugin [list|install|enable|disable|uninstall|update] — Plugin management",
+      "/agents [list|help] — Agent management",
+      "/skills [list|install|help] — Skill management"
+    ],
+    "authentication": [
+      "/login — Start OAuth flow",
+      "/logout — Clear credentials"
+    ],
+    "editing": [
+      "/undo — Undo last edit",
+      "/stop — Stop current operation",
+      "/retry — Retry last operation",
+      "/paste — Paste from clipboard",
+      "/screenshot — Take screenshot",
+      "/image <path> — Load image"
+    ],
+    "advanced": [
+      "/thinkback — Review reasoning",
+      "/release-notes — Show release notes",
+      "/security-review — Security audit",
+      "/debug-tool-call — Debug tool execution",
+      "/doctor — Diagnostic check"
+    ],
+    "interface": [
+      "/theme [theme] — Set UI theme",
+      "/vim — Toggle vim mode",
+      "/voice [on|off] — Voice input",
+      "/language [lang] — Set language",
+      "/output-style [style] — Set output style",
+      "/keybindings — Keyboard shortcuts",
+      "/privacy-settings — Privacy controls",
+      "/allowed-tools — Show tool access",
+      "/api-key — API key management"
+    ],
+    "approval": [
+      "/approve (y, yes) — Approve action",
+      "/deny (n, no) — Deny action"
+    ]
+  },
+  "model_aliases": {
+    "opus": "claude-opus-4-6",
+    "sonnet": "claude-sonnet-4-6",
+    "haiku": "claude-haiku-4-5-20251213"
+  }
+}

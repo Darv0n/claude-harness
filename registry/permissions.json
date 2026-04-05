@@ -1,0 +1,88 @@
+{
+  "_meta": {
+    "description": "Claude Code permission system. Source-verified from claw-code.",
+    "version": "2.0.0",
+    "source": "apps/claw-code/rust/crates/runtime/src/permissions.rs + permission_enforcer.rs",
+    "last_updated": "2026-04-05"
+  },
+  "permission_modes": {
+    "ReadOnly": {
+      "description": "File reads, searches only. Safest mode.",
+      "source_file": "runtime/src/permissions.rs:7-28",
+      "allows": ["read_file", "glob_search", "grep_search", "web_search", "web_fetch", "tool_search"],
+      "blocks": ["write_file", "edit_file", "bash", "agent", "task_create"]
+    },
+    "WorkspaceWrite": {
+      "description": "Read + file writes and edits within workspace.",
+      "allows": ["read_file", "write_file", "edit_file", "glob_search", "grep_search", "web_search", "web_fetch", "notebook_edit", "todo_write"],
+      "blocks": ["bash", "agent", "task_create"],
+      "escalation": "Prompts user for bash/agent operations"
+    },
+    "DangerFullAccess": {
+      "description": "Full access to all tools including bash and agents.",
+      "allows": ["ALL"],
+      "blocks": [],
+      "warning": "Use only in trusted environments"
+    },
+    "Prompt": {
+      "description": "Ask user for each tool use individually. Legacy mode.",
+      "behavior": "Every tool call triggers a permission prompt"
+    },
+    "Allow": {
+      "description": "Auto-allow all operations. Equivalent to bypassPermissions.",
+      "behavior": "No permission checks performed"
+    }
+  },
+  "granular_rules": {
+    "source_file": "runtime/src/permissions.rs:131-148",
+    "format": {
+      "allow": ["<tool>:<input_pattern>"],
+      "deny": ["<tool>:<input_pattern>"],
+      "ask": ["<tool>:<input_pattern>"]
+    },
+    "pattern_syntax": {
+      "wildcard": "* matches any string",
+      "glob": "src/**/*.ts for path patterns",
+      "exact": "rm -rf for exact match"
+    },
+    "examples": {
+      "allow": ["bash:npm *", "read:/**", "bash:echo*"],
+      "deny": ["bash:rm -rf", "bash:git push --force"],
+      "ask": ["write:*.rs", "bash:git push"]
+    },
+    "evaluation_order": [
+      "1. Check deny rules (block immediately)",
+      "2. Check if mode sufficient for tool",
+      "3. Check ask rules (prompt user)",
+      "4. Check allow rules (auto-allow)",
+      "5. Fall back to mode decision"
+    ]
+  },
+  "permission_enforcer": {
+    "source_file": "runtime/src/permission_enforcer.rs (340 LOC)",
+    "struct": "PermissionEnforcer",
+    "methods": ["check_file_write(path)", "check_bash(cmd)", "check(request)"],
+    "results": {
+      "Allowed": "Tool execution proceeds",
+      "Denied": "Tool blocked with reason string",
+      "RequiresPrompt": "User asked for approval"
+    }
+  },
+  "hook_override": {
+    "description": "Hooks can override permission decisions",
+    "source_file": "runtime/src/hooks.rs:80-149",
+    "options": ["Allow", "Deny", "Ask"]
+  },
+  "plugin_permissions": {
+    "per_tool": "Each plugin tool declares requiredPermission: read-only | workspace-write | danger-full-access",
+    "enforcement": "Plugin tool permissions checked against current mode before execution"
+  },
+  "settings_format": {
+    "permissions": {
+      "defaultMode": "dontAsk|auto|bypassPermissions|plan|default|read-only|workspace-write|danger-full-access",
+      "allow": ["bash:echo*", "read:/**"],
+      "deny": ["bash:rm -rf"],
+      "ask": ["write:*.rs", "bash:git push"]
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MemoryStructure",
+  "description": "Claude Code memory system structure",
+  "type": "object",
+  "required": ["memory_md", "memory_files"],
+  "properties": {
+    "memory_md": {
+      "type": "object",
+      "description": "MEMORY.md index file",
+      "properties": {
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "heading": { "type": "string" },
+              "entries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "title": { "type": "string" },
+                    "file": { "type": "string" },
+                    "hook": { "type": "string", "maxLength": 150 }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "memory_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["filename", "frontmatter", "content"],
+        "properties": {
+          "filename": { "type": "string" },
+          "frontmatter": {
+            "type": "object",
+            "required": ["name", "description", "type"],
+            "properties": {
+              "name": { "type": "string" },
+              "description": { "type": "string" },
+              "type": { "enum": ["user", "feedback", "project", "reference"] }
+            }
+          },
+          "content": { "type": "string" }
+        }
+      }
+    },
+    "learning_loop": {
+      "type": "object",
+      "description": "How the environment accumulates knowledge from use",
+      "properties": {
+        "pattern_sources": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "What activities generate learnable patterns"
+        },
+        "extraction_trigger": {
+          "type": "string",
+          "description": "When/how patterns get extracted into memory"
+        },
+        "feedback_channel": {
+          "type": "string",
+          "description": "How user corrections feed back into memory"
+        }
+      }
+    }
+  },
+  "memory_types": {
+    "user": "Information about the operator's role, preferences, expertise",
+    "feedback": "Corrections and confirmations about approach — what to avoid/repeat",
+    "project": "Ongoing work state, goals, deadlines, decisions",
+    "reference": "Pointers to external resources, dashboards, tracking systems"
+  }
+}

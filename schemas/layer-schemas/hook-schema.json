@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HookDefinition",
+  "description": "Claude Code hook configuration for settings.json",
+  "type": "object",
+  "required": ["event", "command"],
+  "properties": {
+    "event": {
+      "enum": ["UserPromptSubmit", "PreToolUse", "PostToolUse", "Stop"],
+      "description": "When the hook fires in the CC lifecycle"
+    },
+    "command": {
+      "type": "string",
+      "description": "Shell command to execute when the hook fires"
+    },
+    "pattern": {
+      "type": "string",
+      "description": "Regex pattern to match against (tool name for Pre/PostToolUse, prompt for UserPromptSubmit)"
+    },
+    "timeout_ms": {
+      "type": "integer",
+      "default": 10000,
+      "description": "Maximum execution time before the hook is killed"
+    }
+  },
+  "examples": [
+    {
+      "event": "UserPromptSubmit",
+      "pattern": "linkedin\\.com|\\[OUTREACH\\]",
+      "command": "echo 'Consider using /research to build a dossier first'"
+    },
+    {
+      "event": "PostToolUse",
+      "pattern": "Write",
+      "command": "node scripts/quality-gate.js"
+    }
+  ]
+}

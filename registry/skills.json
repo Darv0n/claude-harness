@@ -1,0 +1,61 @@
+{
+  "_meta": {
+    "description": "Claude Code skill (slash command) system registry.",
+    "version": "1.0.0",
+    "source": "apps/claw-code/src/",
+    "last_updated": "2026-04-05"
+  },
+  "skill_definition": {
+    "location": "~/.claude/skills/*.md or .claude/skills/*.md",
+    "format": "Markdown with YAML frontmatter",
+    "frontmatter_fields": {
+      "description": {
+        "type": "string",
+        "required": true,
+        "description": "Trigger description — CC uses this to decide when to activate the skill. THE most important field. Include trigger conditions AND example phrases."
+      },
+      "args": {
+        "type": "string",
+        "required": false,
+        "description": "Expected argument format"
+      }
+    },
+    "body": "Markdown instructions that tell CC exactly what to do when the skill is invoked"
+  },
+  "invocation": {
+    "user_facing": "/skill-name [args] — user types this in the prompt",
+    "programmatic": "Skill tool with skill name parameter",
+    "automatic": "CC can auto-activate if description matches user intent"
+  },
+  "design_principles": [
+    "Skills define WHAT to do, not WHO does it (that's agents)",
+    "Trigger description is everything — invest time in making it precise",
+    "Include 3+ example trigger phrases in the description",
+    "Progressive disclosure — start minimal, expand based on context",
+    "Composability — skills can invoke other skills",
+    "Quality gates — every external-facing output needs a validation step",
+    "Memory awareness — explicitly declare what memory files are read/written"
+  ],
+  "skill_patterns": {
+    "workflow_skill": {
+      "purpose": "Orchestrate a multi-step workflow",
+      "pattern": "Read context → spawn agents → collect results → validate → output",
+      "example": "/research, /outreach, /pipeline"
+    },
+    "analysis_skill": {
+      "purpose": "Analyze something and present findings",
+      "pattern": "Read input → analyze → format → present",
+      "example": "/analyze, /score, /audit"
+    },
+    "generation_skill": {
+      "purpose": "Generate an artifact",
+      "pattern": "Read context → generate → quality check → save",
+      "example": "/generate, /compose, /draft"
+    },
+    "management_skill": {
+      "purpose": "View or manage state",
+      "pattern": "Read state → aggregate → display → suggest actions",
+      "example": "/pipeline, /dashboard, /status"
+    }
+  }
+}

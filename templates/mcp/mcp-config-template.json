@@ -1,0 +1,12 @@
+{
+  "_comment": "Template: .mcp.json for external service integration",
+  "mcpServers": {
+    "{{SERVICE_NAME}}": {
+      "command": "{{COMMAND}}",
+      "args": ["{{ARG_1}}", "{{ARG_2}}"],
+      "env": {
+        "{{ENV_VAR}}": "{{ENV_VALUE}}"
+      }
+    }
+  }
+}

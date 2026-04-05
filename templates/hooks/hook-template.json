@@ -1,0 +1,38 @@
+{
+  "_comment": "Template: settings.json hooks section for a generated CC environment",
+  "_usage": "Replace {{DOMAIN}}, {{PATTERNS}}, and {{ACTIONS}} with domain-specific values",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "_purpose": "Route domain-specific inputs to the right workflow",
+        "pattern": "{{INPUT_DETECTION_PATTERN}}",
+        "command": "echo '{{ROUTING_SUGGESTION}}'"
+      },
+      {
+        "_purpose": "Detect quality-sensitive operations",
+        "pattern": "{{QUALITY_TRIGGER_PATTERN}}",
+        "command": "echo '[QUALITY CHECK] {{QUALITY_REMINDER}}'"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "_purpose": "Guard dangerous tool operations",
+        "pattern": "{{GUARDED_TOOL}}",
+        "command": "{{GUARD_SCRIPT}}"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "_purpose": "Validate outputs after tool execution",
+        "pattern": "{{VALIDATED_TOOL}}",
+        "command": "{{VALIDATION_SCRIPT}}"
+      }
+    ],
+    "Stop": [
+      {
+        "_purpose": "Capture session learnings on conversation end",
+        "command": "{{LEARNING_CAPTURE_SCRIPT}}"
+      }
+    ]
+  }
+}

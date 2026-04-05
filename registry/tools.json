@@ -1,0 +1,253 @@
+{
+  "_meta": {
+    "description": "Claude Code built-in tool registry. Extracted from claw-code source analysis.",
+    "version": "1.0.0",
+    "source": "apps/claw-code/src/",
+    "last_updated": "2026-04-05"
+  },
+  "tools": {
+    "file_io": [
+      {
+        "name": "Read",
+        "category": "file_io",
+        "description": "Read file contents from local filesystem. Supports text, images, PDFs, Jupyter notebooks.",
+        "parameters": {
+          "file_path": { "type": "string", "required": true, "description": "Absolute path to file" },
+          "offset": { "type": "integer", "required": false, "description": "Line number to start from" },
+          "limit": { "type": "integer", "required": false, "description": "Number of lines to read" },
+          "pages": { "type": "string", "required": false, "description": "Page range for PDFs (e.g., '1-5')" }
+        },
+        "output": "File contents with line numbers (cat -n format)",
+        "constraints": ["Must use absolute paths", "Default 2000 line limit", "PDF max 20 pages per request"],
+        "agent_access": "Available to all agents by default"
+      },
+      {
+        "name": "Write",
+        "category": "file_io",
+        "description": "Write or overwrite file on local filesystem.",
+        "parameters": {
+          "file_path": { "type": "string", "required": true, "description": "Absolute path to file" },
+          "content": { "type": "string", "required": true, "description": "Content to write" }
+        },
+        "constraints": ["Must Read file first if it exists", "Overwrites existing content", "Prefer Edit for modifications"],
+        "agent_access": "Requires explicit grant in agent tools list"
+      },
+      {
+        "name": "Edit",
+        "category": "file_io",
+        "description": "Exact string replacement in files. Sends only the diff.",
+        "parameters": {
+          "file_path": { "type": "string", "required": true },
+          "old_string": { "type": "string", "required": true, "description": "Text to find (must be unique)" },
+          "new_string": { "type": "string", "required": true, "description": "Replacement text" },
+          "replace_all": { "type": "boolean", "required": false, "default": false }
+        },
+        "constraints": ["Must Read file first", "old_string must be unique unless replace_all=true"],
+        "agent_access": "Requires explicit grant"
+      },
+      {
+        "name": "Glob",
+        "category": "file_io",
+        "description": "Fast file pattern matching. Find files by name patterns.",
+        "parameters": {
+          "pattern": { "type": "string", "required": true, "description": "Glob pattern (e.g., '**/*.ts')" },
+          "path": { "type": "string", "required": false, "description": "Directory to search in" }
+        },
+        "output": "Matching file paths sorted by modification time",
+        "agent_access": "Available to most agents"
+      },
+      {
+        "name": "Grep",
+        "category": "file_io",
+        "description": "Content search using ripgrep. Full regex support.",
+        "parameters": {
+          "pattern": { "type": "string", "required": true, "description": "Regex pattern" },
+          "path": { "type": "string", "required": false },
+          "glob": { "type": "string", "required": false, "description": "File filter (e.g., '*.ts')" },
+          "output_mode": { "type": "string", "enum": ["content", "files_with_matches", "count"] },
+          "context": { "type": "integer", "required": false },
+          "multiline": { "type": "boolean", "required": false }
+        },
+        "agent_access": "Available to most agents"
+      }
+    ],
+    "execution": [
+      {
+        "name": "Bash",
+        "category": "execution",
+        "description": "Execute shell commands. Working directory persists between calls.",
+        "parameters": {
+          "command": { "type": "string", "required": true },
+          "timeout": { "type": "integer", "required": false, "default": 120000, "max": 600000 },
+          "run_in_background": { "type": "boolean", "required": false }
+        },
+        "constraints": ["Use Unix syntax on all platforms", "Prefer dedicated tools over shell equivalents", "Max 10 min timeout"],
+        "agent_access": "Requires explicit grant — powerful tool"
+      }
+    ],
+    "search": [
+      {
+        "name": "WebSearch",
+        "category": "search",
+        "description": "Search the web for information.",
+        "parameters": {
+          "query": { "type": "string", "required": true }
+        },
+        "agent_access": "Requires explicit grant"
+      },
+      {
+        "name": "WebFetch",
+        "category": "search",
+        "description": "Fetch content from a URL.",
+        "parameters": {
+          "url": { "type": "string", "required": true }
+        },
+        "agent_access": "Requires explicit grant"
+      }
+    ],
+    "agents": [
+      {
+        "name": "Agent",
+        "category": "agents",
+        "description": "Spawn a subagent for complex, multi-step tasks. Supports multiple agent types.",
+        "parameters": {
+          "prompt": { "type": "string", "required": true, "description": "Task description for the agent" },
+          "description": { "type": "string", "required": true, "description": "3-5 word summary" },
+          "subagent_type": { "type": "string", "required": false, "description": "Specialized agent type" },
+          "model": { "type": "string", "enum": ["opus", "sonnet", "haiku"], "required": false },
+          "mode": { "type": "string", "enum": ["acceptEdits", "auto", "bypassPermissions", "default", "dontAsk", "plan"], "required": false },
+          "run_in_background": { "type": "boolean", "required": false },
+          "isolation": { "type": "string", "enum": ["worktree"], "required": false },
+          "name": { "type": "string", "required": false, "description": "Addressable name for SendMessage" }
+        },
+        "constraints": ["Include complete task description — agent has no prior context", "Launch independent agents in parallel", "Max concurrency depends on system resources"],
+        "agent_access": "Requires explicit grant — enables multi-agent patterns"
+      },
+      {
+        "name": "SendMessage",
+        "category": "agents",
+        "description": "Send a message to a running agent by name or ID.",
+        "parameters": {
+          "to": { "type": "string", "required": true },
+          "message": { "type": "string", "required": true }
+        },
+        "agent_access": "Available when Agent tool is granted"
+      }
+    ],
+    "tasks": [
+      {
+        "name": "TaskCreate",
+        "category": "tasks",
+        "description": "Create a structured task for tracking progress.",
+        "parameters": {
+          "subject": { "type": "string", "required": true },
+          "description": { "type": "string", "required": true },
+          "activeForm": { "type": "string", "required": false }
+        },
+        "agent_access": "Available to most agents"
+      },
+      {
+        "name": "TaskUpdate",
+        "category": "tasks",
+        "description": "Update task status, description, owner, or dependencies.",
+        "parameters": {
+          "taskId": { "type": "string", "required": true },
+          "status": { "type": "string", "enum": ["pending", "in_progress", "completed", "deleted"] },
+          "subject": { "type": "string" },
+          "description": { "type": "string" },
+          "owner": { "type": "string" },
+          "addBlockedBy": { "type": "array" },
+          "addBlocks": { "type": "array" }
+        }
+      },
+      {
+        "name": "TaskGet",
+        "category": "tasks",
+        "description": "Get details of a specific task."
+      },
+      {
+        "name": "TaskList",
+        "category": "tasks",
+        "description": "List all tasks in the current session."
+      }
+    ],
+    "plans": [
+      {
+        "name": "EnterPlanMode",
+        "category": "plans",
+        "description": "Enter plan mode — design before executing."
+      },
+      {
+        "name": "ExitPlanMode",
+        "category": "plans",
+        "description": "Exit plan mode and begin execution."
+      }
+    ],
+    "scheduling": [
+      {
+        "name": "CronCreate",
+        "category": "scheduling",
+        "description": "Create a scheduled recurring task."
+      },
+      {
+        "name": "CronDelete",
+        "category": "scheduling",
+        "description": "Delete a scheduled task."
+      },
+      {
+        "name": "CronList",
+        "category": "scheduling",
+        "description": "List all scheduled tasks."
+      }
+    ],
+    "mcp": [
+      {
+        "name": "ListMcpResourcesTool",
+        "category": "mcp",
+        "description": "List available MCP server resources."
+      },
+      {
+        "name": "ReadMcpResourceTool",
+        "category": "mcp",
+        "description": "Read a specific MCP resource."
+      }
+    ],
+    "notebooks": [
+      {
+        "name": "NotebookEdit",
+        "category": "notebooks",
+        "description": "Edit Jupyter notebook cells."
+      }
+    ],
+    "skills": [
+      {
+        "name": "Skill",
+        "category": "skills",
+        "description": "Invoke a registered skill (slash command).",
+        "parameters": {
+          "skill": { "type": "string", "required": true },
+          "args": { "type": "string", "required": false }
+        }
+      }
+    ],
+    "other": [
+      {
+        "name": "AskUserQuestion",
+        "category": "other",
+        "description": "Ask the user a question and wait for response."
+      },
+      {
+        "name": "ToolSearch",
+        "category": "other",
+        "description": "Search for and load deferred tool schemas."
+      },
+      {
+        "name": "RemoteTrigger",
+        "category": "other",
+        "description": "Trigger a remote agent execution."
+      }
+    ]
+  },
+  "tool_count": 25,
+  "categories": ["file_io", "execution", "search", "agents", "tasks", "plans", "scheduling", "mcp", "notebooks", "skills", "other"]
+}

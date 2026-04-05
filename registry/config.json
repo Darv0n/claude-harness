@@ -1,0 +1,84 @@
+{
+  "_meta": {
+    "description": "Claude Code configuration system. Complete settings.json schema. Source-verified.",
+    "version": "1.0.0",
+    "source": "apps/claw-code/rust/crates/runtime/src/config.rs",
+    "last_updated": "2026-04-05"
+  },
+  "config_sources": {
+    "source_file": "runtime/src/config.rs:229-256",
+    "enum": "ConfigSource { User, Project, Local }",
+    "discovery_order": [
+      { "path": "~/.claw.json", "source": "User", "type": "legacy" },
+      { "path": "~/.claw/settings.json", "source": "User", "type": "current" },
+      { "path": "~/.config/claw/settings.json", "source": "User", "type": "XDG" },
+      { "path": ".claw.json", "source": "Project", "type": "legacy" },
+      { "path": ".claw/settings.json", "source": "Project", "type": "current" },
+      { "path": ".claw/settings.local.json", "source": "Local", "type": "machine-specific" }
+    ],
+    "merge": "Deep merge, later entries override earlier",
+    "validation": "Hook commands validated BEFORE merge. Malformed entries fail with source-path context."
+  },
+  "cc_equivalents": {
+    "note": "Claude Code (the product) uses .claude/ instead of .claw/",
+    "mapping": {
+      ".claw.json": ".claude.json",
+      ".claw/settings.json": ".claude/settings.json",
+      ".claw/settings.local.json": ".claude/settings.local.json",
+      "~/.claw/": "~/.claude/"
+    }
+  },
+  "complete_settings_schema": {
+    "permissions": {
+      "defaultMode": "dontAsk|auto|bypassPermissions|plan|default|read-only|workspace-write|danger-full-access",
+      "allow": ["tool:pattern array"],
+      "deny": ["tool:pattern array"],
+      "ask": ["tool:pattern array"]
+    },
+    "model": "claude-opus-4-6|claude-sonnet-4-6|claude-haiku-4-5-20251213|opus|sonnet|haiku",
+    "hooks": {
+      "PreToolUse": ["command array"],
+      "PostToolUse": ["command array"],
+      "PostToolUseFailure": ["command array"]
+    },
+    "plugins": {
+      "enabled": { "plugin-id": true },
+      "externalDirectories": ["/path/to/plugins"],
+      "installRoot": "~/.claw/plugins",
+      "registryPath": "~/.claw/installed.json",
+      "bundledRoot": null
+    },
+    "mcp": {
+      "servers": {}
+    },
+    "oauth": {
+      "clientId": "string",
+      "authorizeUrl": "string",
+      "tokenUrl": "string",
+      "callbackPort": "number",
+      "manualRedirectUrl": "string",
+      "scopes": ["openid", "profile", "email"]
+    },
+    "sandbox": {
+      "enabled": true,
+      "namespaceRestrictions": true,
+      "networkIsolation": false,
+      "filesystemMode": "off|workspace-only|allow-list",
+      "allowedMounts": ["/mnt/data"]
+    }
+  },
+  "feature_config": {
+    "source_file": "runtime/src/config.rs:54-64",
+    "struct": "RuntimeFeatureConfig",
+    "fields": [
+      "hooks: RuntimeHookConfig",
+      "plugins: RuntimePluginConfig",
+      "mcp: McpConfigCollection",
+      "oauth: Option<OAuthConfig>",
+      "model: Option<String>",
+      "permission_mode: Option<ResolvedPermissionMode>",
+      "permission_rules: RuntimePermissionRuleConfig",
+      "sandbox: SandboxConfig"
+    ]
+  }
+}

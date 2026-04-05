@@ -1,0 +1,183 @@
+{
+  "_meta": {
+    "description": "Claude Code hook system registry. Source-verified from claw-code + runtime observation.",
+    "version": "2.0.0",
+    "source": "apps/claw-code/rust/crates/runtime/src/hooks.rs + runtime/src/config.rs",
+    "last_updated": "2026-04-05"
+  },
+  "hook_events": {
+    "PreToolUse": {
+      "description": "Fires before a tool executes. Can block the tool call via exit code.",
+      "timing": "pre-execution",
+      "source_file": "rust/crates/runtime/src/hooks.rs:19-34",
+      "input_protocol": {
+        "stdin_payload": {
+          "event": "PreToolUse",
+          "tool_name": "string (e.g., 'bash', 'write_file')",
+          "tool_input": "string (JSON of tool parameters)"
+        },
+        "env_vars": {
+          "HOOK_EVENT": "PreToolUse",
+          "HOOK_TOOL_NAME": "Tool name",
+          "HOOK_TOOL_INPUT": "JSON input to the tool"
+        }
+      },
+      "exit_codes": {
+        "0": "Allow execution to proceed",
+        "1": "Deny/block execution",
+        "other": "Failure — stops hook chain"
+      },
+      "output_behavior": "stdout becomes system message (warning/guidance). Non-zero exit blocks the tool.",
+      "can_return": ["permission_override (Allow/Deny/Ask)", "updated_input", "messages"],
+      "common_uses": [
+        "Guard dangerous operations (prevent deleting certain files)",
+        "Validate parameters before execution",
+        "Log tool usage",
+        "Apply domain-specific constraints"
+      ]
+    },
+    "PostToolUse": {
+      "description": "Fires after a tool executes successfully.",
+      "timing": "post-execution",
+      "source_file": "rust/crates/runtime/src/hooks.rs:19-34",
+      "input_protocol": {
+        "stdin_payload": {
+          "event": "PostToolUse",
+          "tool_name": "string",
+          "tool_input": "string (JSON)",
+          "tool_output": "string (tool result)",
+          "is_error": false
+        },
+        "env_vars": {
+          "HOOK_EVENT": "PostToolUse",
+          "HOOK_TOOL_NAME": "Tool name",
+          "HOOK_TOOL_INPUT": "JSON input",
+          "HOOK_TOOL_OUTPUT": "Tool output",
+          "HOOK_TOOL_IS_ERROR": "0"
+        }
+      },
+      "exit_codes": {
+        "0": "Continue normally",
+        "1": "Flag issue (stdout shown as system message)"
+      },
+      "output_behavior": "stdout becomes a system message shown after tool result",
+      "common_uses": [
+        "Quality-check outputs after Write/Edit",
+        "Trigger follow-up workflows",
+        "Log completed operations",
+        "Run linters/formatters after code changes"
+      ]
+    },
+    "PostToolUseFailure": {
+      "description": "Fires after a tool execution fails/errors.",
+      "timing": "post-error",
+      "source_file": "rust/crates/runtime/src/hooks.rs:19-34",
+      "input_protocol": {
+        "stdin_payload": {
+          "event": "PostToolUseFailure",
+          "tool_name": "string",
+          "tool_input": "string (JSON)",
+          "tool_output": "string (error message)",
+          "is_error": true
+        },
+        "env_vars": {
+          "HOOK_EVENT": "PostToolUseFailure",
+          "HOOK_TOOL_NAME": "Tool name",
+          "HOOK_TOOL_INPUT": "JSON input",
+          "HOOK_TOOL_OUTPUT": "Error output",
+          "HOOK_TOOL_IS_ERROR": "1"
+        }
+      },
+      "common_uses": [
+        "Error recovery automation",
+        "Fallback strategies",
+        "Error logging and alerting"
+      ]
+    },
+    "UserPromptSubmit": {
+      "description": "Fires before Claude sees the user's input. Runtime-observed, not in claw-code Rust source.",
+      "timing": "pre-processing",
+      "source_verified": false,
+      "source_note": "Observed in Claude Code runtime system prompt, not found in claw-code Rust source. May be implemented at a higher layer.",
+      "input": "User's prompt text",
+      "pattern_matches_against": "User's raw input text",
+      "common_uses": [
+        "Route domain-specific inputs to workflows",
+        "Detect patterns (URLs, keywords, commands) and suggest skills",
+        "Pre-process or enrich user input"
+      ],
+      "output_behavior": "stdout becomes a system message prepended to the prompt"
+    },
+    "Stop": {
+      "description": "Fires when the conversation/session ends. Runtime-observed.",
+      "timing": "session-end",
+      "source_verified": false,
+      "source_note": "Observed in Claude Code runtime system prompt. May map to plugin lifecycle Shutdown event.",
+      "common_uses": [
+        "Capture session learnings",
+        "Update analytics/metrics",
+        "Clean up temporary state"
+      ]
+    }
+  },
+  "configuration": {
+    "location": "settings.json or .claude/settings.json or .claw/settings.json",
+    "source_file": "rust/crates/runtime/src/config.rs:66-72",
+    "format": {
+      "hooks": {
+        "PreToolUse": ["command1", "command2"],
+        "PostToolUse": ["command3"],
+        "PostToolUseFailure": ["error_handler.sh"]
+      }
+    },
+    "alternate_format": {
+      "hooks": {
+        "<EventType>": [
+          {
+            "pattern": "regex pattern (matches tool name or input)",
+            "command": "shell command to execute"
+          }
+        ]
+      }
+    },
+    "execution": {
+      "runner": "HookRunner (rust/crates/runtime/src/hooks.rs:156-300)",
+      "abort_signal": "HookAbortSignal — allows cancelling running hooks",
+      "progress_reporter": "HookProgressReporter — reports hook progress events",
+      "sequential": true,
+      "timeout_ms": 10000
+    },
+    "notes": [
+      "Multiple hooks can fire for the same event",
+      "Hooks execute sequentially within an event type",
+      "Hook commands run in the project directory",
+      "Hooks receive JSON on stdin AND via environment variables",
+      "Exit code 0 = allow, 1 = deny, other = failure (stops chain)",
+      "Hooks can return PermissionOverride (Allow/Deny/Ask)",
+      "Config validated BEFORE deep-merge to prevent cascading errors"
+    ]
+  },
+  "design_patterns": {
+    "guard": {
+      "event": "PreToolUse",
+      "purpose": "Block or warn before risky operations",
+      "example_command": "node scripts/guard-dangerous-commands.js"
+    },
+    "quality_gate": {
+      "event": "PostToolUse",
+      "purpose": "Validate output quality after tool execution",
+      "example_command": "echo '[QUALITY CHECK] Review output for compliance'"
+    },
+    "error_recovery": {
+      "event": "PostToolUseFailure",
+      "purpose": "Auto-recover from known failure modes",
+      "example_command": "node scripts/recovery-handler.js"
+    },
+    "router": {
+      "event": "UserPromptSubmit",
+      "purpose": "Detect input type and suggest appropriate skill",
+      "example_command": "echo 'Consider using /research first'",
+      "source_note": "Runtime-observed pattern, not source-verified"
+    }
+  }
+}

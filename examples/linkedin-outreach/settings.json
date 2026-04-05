@@ -1,0 +1,25 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "pattern": "linkedin\\.com\\/in\\/|linkedin\\.com\\/company\\/",
+        "command": "echo '[OUTREACH] LinkedIn profile detected. Consider using /research to build a dossier before reaching out.'"
+      },
+      {
+        "pattern": "\\[OUTREACH\\]|outreach|reach out|cold email|sequence",
+        "command": "echo '[OUTREACH] Starting outreach workflow. Review ICP tier before generating sequence.'"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "pattern": "Write",
+        "command": "echo '[QUALITY CHECK] Review outreach message for: language match, template freshness, zero-template energy, mobile preview length.'"
+      }
+    ],
+    "Stop": [
+      {
+        "command": "echo 'Session complete. Patterns from this session should be captured in memory/patterns/.'"
+      }
+    ]
+  }
+}

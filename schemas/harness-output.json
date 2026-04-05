@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HarnessOutput",
+  "description": "Complete generated Claude Code environment",
+  "type": "object",
+  "required": ["metadata", "layers"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["domain", "generated_at", "registry_version"],
+      "properties": {
+        "domain": { "type": "string" },
+        "generated_at": { "type": "string", "format": "date-time" },
+        "registry_version": { "type": "string" },
+        "capability_coverage": {
+          "type": "object",
+          "description": "How many CC capabilities are utilized",
+          "properties": {
+            "tools_used": { "type": "integer" },
+            "tools_available": { "type": "integer" },
+            "hook_types_used": { "type": "integer" },
+            "agents_created": { "type": "integer" },
+            "skills_created": { "type": "integer" },
+            "memory_types_used": { "type": "integer" },
+            "mcp_servers": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "layers": {
+      "type": "object",
+      "required": ["L0_hooks", "L1_claude_md", "L2_skills", "L3_agents", "L4_memory", "L5_tools"],
+      "properties": {
+        "L0_hooks": {
+          "type": "object",
+          "description": "settings.json hook configurations",
+          "properties": {
+            "settings_json": { "type": "object" },
+            "hook_manifest": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "event": { "enum": ["UserPromptSubmit", "PreToolUse", "PostToolUse", "Stop"] },
+                  "trigger_pattern": { "type": "string" },
+                  "action": { "type": "string" },
+                  "purpose": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "L1_claude_md": {
+          "type": "object",
+          "description": "CLAUDE.md content and structure",
+          "properties": {
+            "content": { "type": "string" },
+            "sections": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "heading": { "type": "string" },
+                  "purpose": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "L2_skills": {
+          "type": "array",
+          "description": "Skill file definitions",
+          "items": {
+            "type": "object",
+            "required": ["filename", "content"],
+            "properties": {
+              "filename": { "type": "string" },
+              "content": { "type": "string" },
+              "trigger_description": { "type": "string" },
+              "tools_used": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "L3_agents": {
+          "type": "array",
+          "description": "Agent definitions",
+          "items": {
+            "type": "object",
+            "required": ["filename", "content"],
+            "properties": {
+              "filename": { "type": "string" },
+              "content": { "type": "string" },
+              "model": { "enum": ["opus", "sonnet", "haiku"] },
+              "tools": { "type": "array", "items": { "type": "string" } },
+              "role": { "type": "string" }
+            }
+          }
+        },
+        "L4_memory": {
+          "type": "object",
+          "description": "Memory structure and initial state",
+          "properties": {
+            "memory_md": { "type": "string" },
+            "memory_files": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "filename": { "type": "string" },
+                  "type": { "enum": ["user", "feedback", "project", "reference"] },
+                  "content": { "type": "string" }
+                }
+              }
+            },
+            "learning_loop": {
+              "type": "object",
+              "description": "How the environment learns from use",
+              "properties": {
+                "pattern_extraction": { "type": "string" },
+                "feedback_integration": { "type": "string" },
+                "metric_tracking": { "type": "string" }
+              }
+            }
+          }
+        },
+        "L5_tools": {
+          "type": "object",
+          "description": "Tool orchestration strategy",
+          "properties": {
+            "tool_mapping": {
+              "type": "array",
+              "description": "Maps domain operations to CC tools",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "operation": { "type": "string" },
+                  "tool": { "type": "string" },
+                  "rationale": { "type": "string" }
+                }
+              }
+            },
+            "mcp_config": {
+              "type": "object",
+              "description": ".mcp.json content for external service integration"
+            }
+          }
+        }
+      }
+    },
+    "data_flow": {
+      "type": "object",
+      "description": "How data moves between layers",
+      "properties": {
+        "entry_points": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "input_type": { "type": "string" },
+              "receiving_layer": { "type": "string" },
+              "routing_logic": { "type": "string" }
+            }
+          }
+        },
+        "cross_layer_flows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from_layer": { "type": "string" },
+              "to_layer": { "type": "string" },
+              "data": { "type": "string" },
+              "mechanism": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "file_inventory": {
+      "type": "array",
+      "description": "Complete list of files to be created",
+      "items": {
+        "type": "object",
+        "required": ["path", "layer", "purpose"],
+        "properties": {
+          "path": { "type": "string" },
+          "layer": { "type": "string" },
+          "purpose": { "type": "string" }
+        }
+      }
+    }
+  }
+}

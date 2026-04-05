@@ -1,0 +1,17 @@
+# Generated outputs (regenerated per run)
+engine/output/
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Env
+.env
+.env.local

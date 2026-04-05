@@ -1,0 +1,114 @@
+{
+  "_meta": {
+    "description": "Claude Code MCP integration registry. Source-verified from claw-code.",
+    "version": "2.0.0",
+    "source": "apps/claw-code/rust/crates/runtime/src/mcp*.rs + config.rs:84-164",
+    "last_updated": "2026-04-05"
+  },
+  "mcp_system": {
+    "description": "MCP servers extend CC with external service tools via JSON-RPC.",
+    "config_location": ".mcp.json or settings.json mcp.servers section",
+    "lifecycle": {
+      "source_file": "runtime/src/mcp_lifecycle_hardened.rs",
+      "phases": {
+        "Initializing": "Server starting up, tools being discovered",
+        "Ready": "All tools available",
+        "Degraded": "Some tools unavailable (partial success is first-class)",
+        "Failed": "Server down"
+      },
+      "degraded_report": {
+        "struct": "McpDegradedReport",
+        "fields": ["failed_servers", "recovery_recommendations"],
+        "note": "Successful servers remain usable even when others fail"
+      }
+    }
+  },
+  "transport_types": {
+    "source_file": "runtime/src/config.rs:84-164",
+    "Stdio": {
+      "description": "Local process via stdin/stdout. Most common for local tools.",
+      "config": {
+        "command": "string (executable path)",
+        "args": ["array", "of", "arguments"],
+        "env": { "ENV_VAR": "value" },
+        "tool_call_timeout_ms": "number (optional, default 30000)"
+      },
+      "use_when": "Running a local MCP server process"
+    },
+    "SSE": {
+      "description": "Server-Sent Events for real-time streaming.",
+      "config": {
+        "url": "string (SSE endpoint)",
+        "headers": { "Authorization": "Bearer ..." },
+        "headers_helper": "string (script to generate headers dynamically)",
+        "oauth": "McpOAuthConfig (optional)"
+      }
+    },
+    "HTTP": {
+      "description": "Standard HTTP POST for request/response.",
+      "config": {
+        "url": "string",
+        "headers": {},
+        "headers_helper": "string (optional)",
+        "oauth": "McpOAuthConfig (optional)"
+      }
+    },
+    "WebSocket": {
+      "description": "WebSocket for bidirectional streaming.",
+      "config": {
+        "url": "string (ws:// or wss://)",
+        "headers": {}
+      }
+    },
+    "SDK": {
+      "description": "Managed by runtime SDK. Internal use.",
+      "config": {}
+    },
+    "ManagedProxy": {
+      "description": "claude.ai managed proxy. Platform-provided.",
+      "config": {}
+    }
+  },
+  "oauth_for_mcp": {
+    "source_file": "runtime/src/config.rs",
+    "struct": "McpOAuthConfig",
+    "fields": {
+      "client_id": "string (optional)",
+      "callback_port": "number (optional)",
+      "auth_server_metadata_url": "string (optional)",
+      "xaa": "boolean (optional)"
+    }
+  },
+  "tool_naming": {
+    "source_file": "runtime/src/mcp.rs",
+    "pattern": "mcp__<normalized_server_name>__<tool_name>",
+    "normalization": "Non-alphanumeric chars replaced with underscores",
+    "example": "mcp__claude_ai_Gmail__authenticate"
+  },
+  "tool_bridge": {
+    "source_file": "runtime/src/mcp_tool_bridge.rs",
+    "functions": ["discover available tools", "bridge tool calls to MCP servers", "handle streaming responses"]
+  },
+  "settings_format": {
+    "mcp": {
+      "servers": {
+        "server-name": {
+          "type": "stdio|sse|http|ws|sdk|managed-proxy",
+          "command": "/path/to/server",
+          "args": ["--flag"],
+          "env": { "VAR": "value" },
+          "toolCallTimeoutMs": 30000,
+          "url": "https://...",
+          "headers": { "Authorization": "Bearer ..." },
+          "headersHelper": "script.sh",
+          "oauth": {
+            "clientId": "...",
+            "callbackPort": 8080,
+            "authServerMetadataUrl": "...",
+            "xaa": true
+          }
+        }
+      }
+    }
+  }
+}

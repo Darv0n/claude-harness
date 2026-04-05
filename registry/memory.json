@@ -1,0 +1,80 @@
+{
+  "_meta": {
+    "description": "Claude Code persistent memory system registry.",
+    "version": "1.0.0",
+    "source": "apps/claw-code/src/",
+    "last_updated": "2026-04-05"
+  },
+  "memory_system": {
+    "location": "~/.claude/projects/<project-hash>/memory/",
+    "index_file": "MEMORY.md",
+    "auto_loaded": true,
+    "description": "File-based persistent memory that survives across conversations. MEMORY.md is always loaded into context."
+  },
+  "memory_md": {
+    "format": "Markdown with section headings and entry links",
+    "entry_format": "- [Title](file.md) — one-line hook",
+    "constraints": [
+      "Each entry under ~150 characters",
+      "Lines after ~200 will be truncated",
+      "Is an INDEX, not content — never write memory directly into MEMORY.md",
+      "Organize semantically by topic, not chronologically"
+    ]
+  },
+  "memory_file_format": {
+    "frontmatter": {
+      "name": { "type": "string", "required": true },
+      "description": { "type": "string", "required": true, "description": "Used to decide relevance in future conversations" },
+      "type": { "type": "string", "required": true, "enum": ["user", "feedback", "project", "reference"] }
+    },
+    "body": "Free-form markdown content"
+  },
+  "memory_types": {
+    "user": {
+      "description": "Information about the user's role, goals, responsibilities, knowledge",
+      "when_to_save": "When you learn details about the user's role, preferences, expertise",
+      "how_to_use": "Tailor behavior to user's profile and perspective",
+      "body_structure": "Facts about the user, organized by relevance"
+    },
+    "feedback": {
+      "description": "Corrections and confirmations about approach — what to avoid/repeat",
+      "when_to_save": "When user corrects approach OR confirms non-obvious approach worked",
+      "how_to_use": "Guide behavior so user doesn't need to give same guidance twice",
+      "body_structure": "Rule → Why: (reason) → How to apply: (when/where)"
+    },
+    "project": {
+      "description": "Ongoing work state, goals, initiatives, decisions",
+      "when_to_save": "When you learn who/what/why/when about ongoing work",
+      "how_to_use": "Understand context and motivation behind user's requests",
+      "body_structure": "Fact/decision → Why: (motivation) → How to apply: (implications)"
+    },
+    "reference": {
+      "description": "Pointers to external resources, dashboards, tracking systems",
+      "when_to_save": "When you learn about resources in external systems",
+      "how_to_use": "Know where to look for information outside the project",
+      "body_structure": "Resource name, location, purpose, access details"
+    }
+  },
+  "learning_loop": {
+    "description": "The most powerful memory pattern — environment gets smarter with use",
+    "stages": [
+      "OBSERVE: Track patterns during normal operation",
+      "EXTRACT: On session end or skill completion, write patterns to memory",
+      "APPLY: Subsequent sessions read patterns to inform decisions",
+      "FEEDBACK: User corrections refine the patterns"
+    ],
+    "implementation": {
+      "observe_via": "Agent behavior during workflow execution",
+      "extract_via": "Stop hook or skill completion step",
+      "apply_via": "Memory read at session start or on-demand query",
+      "feedback_via": "User corrections saved as feedback-type memories"
+    }
+  },
+  "what_not_to_save": [
+    "Code patterns derivable from reading current code",
+    "Git history — use git log / git blame",
+    "Debugging solutions — fix is in the code, context in commit message",
+    "Anything already in CLAUDE.md files",
+    "Ephemeral task details / current conversation context"
+  ]
+}

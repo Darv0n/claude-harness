@@ -1,0 +1,127 @@
+{
+  "_meta": {
+    "description": "Claude Code system prompt assembly. Source-verified from claw-code.",
+    "version": "2.0.0",
+    "source": "apps/claw-code/rust/crates/runtime/src/prompt.rs:89-220",
+    "last_updated": "2026-04-05"
+  },
+  "prompt_builder": {
+    "struct": "SystemPromptBuilder",
+    "source_file": "runtime/src/prompt.rs:89-191",
+    "fields": [
+      "output_style_name",
+      "output_style_prompt",
+      "os_name",
+      "os_version",
+      "append_sections",
+      "project_context",
+      "config"
+    ]
+  },
+  "assembly_order": [
+    {
+      "position": 1,
+      "source": "Intro section",
+      "description": "Role, capabilities, behavior. Core CC identity.",
+      "modifiable": false
+    },
+    {
+      "position": 2,
+      "source": "Output style",
+      "description": "Custom formatting if configured via /output-style.",
+      "modifiable": true
+    },
+    {
+      "position": 3,
+      "source": "System instructions",
+      "description": "Core system behavior rules.",
+      "modifiable": false
+    },
+    {
+      "position": 4,
+      "source": "Task instructions",
+      "description": "How to approach problems, tool usage rules.",
+      "modifiable": false
+    },
+    {
+      "position": 5,
+      "source": "Actions section",
+      "description": "Available tool categories and their schemas.",
+      "modifiable": false
+    },
+    {
+      "position": 6,
+      "source": "DYNAMIC BOUNDARY",
+      "description": "__SYSTEM_PROMPT_DYNAMIC_BOUNDARY__ — separates static from dynamic sections.",
+      "modifiable": false
+    },
+    {
+      "position": 7,
+      "source": "Environment context",
+      "description": "Model, working directory, date, platform, shell.",
+      "modifiable": false
+    },
+    {
+      "position": 8,
+      "source": "Project context",
+      "description": "Git status, diffs, discovered instruction files.",
+      "modifiable": false
+    },
+    {
+      "position": 9,
+      "source": "Instruction files (CLAUDE.md)",
+      "description": "Content from CLAUDE.md and .claude/instructions.md files.",
+      "modifiable": true,
+      "constraints": {
+        "per_file_max_chars": 4000,
+        "total_max_chars": 12000,
+        "discovery": "Walks up directory tree from cwd, searches for CLAUDE.md, .claude/CLAUDE.md, .claude/instructions.md",
+        "deduplication": "By path"
+      }
+    },
+    {
+      "position": 10,
+      "source": "Config section",
+      "description": "MCP servers, plugin status, settings.",
+      "modifiable": true
+    },
+    {
+      "position": 11,
+      "source": "Appended sections",
+      "description": "Additional custom instructions.",
+      "modifiable": true
+    }
+  ],
+  "instruction_file_discovery": {
+    "source_file": "runtime/src/prompt.rs:199-220",
+    "search_order": [
+      "/path/to/repo/CLAUDE.md",
+      "/path/to/repo/.claw/CLAUDE.md",
+      "/path/to/repo/.claw/instructions.md",
+      "/path/to/parent/CLAUDE.md (walks up to root)"
+    ],
+    "limits": {
+      "per_file": "4,000 characters",
+      "total": "12,000 characters across all files"
+    }
+  },
+  "config_cascade": {
+    "source_file": "runtime/src/config.rs:229-256",
+    "precedence_order": [
+      "~/.claw.json (legacy user)",
+      "~/.claw/settings.json (user)",
+      ".claw.json (legacy project)",
+      ".claw/settings.json (project)",
+      ".claw/settings.local.json (project local — highest priority)"
+    ],
+    "merge_strategy": "Deep merge, later entries override earlier ones",
+    "validation": "Hook command lists validated BEFORE deep-merge, not after"
+  },
+  "attention_implications": {
+    "total_budget": "Everything in the system prompt competes for attention",
+    "front_loading": "Earlier/higher-priority content gets more attention",
+    "density_matters": "Signal-per-token ratio determines effectiveness",
+    "instruction_file_limit": "4K per file, 12K total — respect the constraint",
+    "design_principle": "Progressive disclosure — load only what's needed for the current phase"
+  }
+}
