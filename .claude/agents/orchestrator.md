@@ -212,9 +212,31 @@ Include in the prompt:
 
 Wait for completion. Read the validation report.
 
+### PHASE 5.5: SMOKE TEST
+
+**This is the phase that catches what static validation misses.**
+
+The validator checks FORM (schemas, references, formats).
+The smoke tester checks FUNCTION (does it actually run?).
+
+Spawn the smoke tester (sonnet, tools: Read, Bash, Glob, Grep):
+
+Read `.claude/agents/smoke-tester.md` and pack its body into the prompt.
+Tell it to test ALL generated artifacts in `engine/output/`:
+- Execute every .sh script with `bash -n` (syntax) then `echo '{}' | bash script.sh` (runtime)
+- Check every binary dependency exists (`which python3`, `which ruff`, etc.)
+- Resolve every file path in settings.json (does the target file exist?)
+- Validate JSON files parse (`python3 -c "import json; json.load(...)"`)
+- Check YAML frontmatter in agent/skill .md files
+- Verify MCP server command is available
+- Report: DEPLOYABLE or NOT DEPLOYABLE with specific failures
+
+If NOT DEPLOYABLE: fix the failures (usually path corrections or missing deps),
+then re-run smoke test. Do not proceed to assembly with broken artifacts.
+
 ### PHASE 6: ASSEMBLE
 
-If validation says READY (or NEEDS_WORK with only minor issues), assemble:
+If validation says READY AND smoke test says DEPLOYABLE, assemble:
 
 1. Create `engine/output/assembled/` directory structure:
    ```

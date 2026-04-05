@@ -116,6 +116,17 @@ Checks:
                                                   │
                                   ┌───────────────▼──────────────────┐
                                   │          VALIDATE                 │
+                                  │   (static: schemas, refs, format) │
+                                  └───────────────┬──────────────────┘
+                                                  │
+                                  ┌───────────────▼──────────────────┐
+                                  │        SMOKE TEST                 │
+                                  │  (dynamic: execute hooks, check   │
+                                  │   paths, verify deps, parse JSON) │
+                                  └───────────────┬──────────────────┘
+                                                  │
+                                  ┌───────────────▼──────────────────┐
+                                  │          ASSEMBLE                 │
                                   │         (serial)                  │
                                   └──────────────────────────────────┘
 ```
@@ -124,3 +135,13 @@ Checks:
 
 The pipeline is invoked via the `/harness` skill, which orchestrates all stages.
 Each stage is implemented as a custom agent that reads the registry and templates.
+
+## Validation Philosophy
+
+Two-phase validation:
+1. **VALIDATE** (static) — checks form: schemas, frontmatter, cross-references, coverage
+2. **SMOKE TEST** (dynamic) — checks function: executes scripts, resolves paths, verifies deps
+
+Static validation catches structural errors (missing frontmatter, broken cross-refs).
+Smoke testing catches runtime errors (wrong paths, missing binaries, unparseable JSON).
+Both must pass before assembly.
