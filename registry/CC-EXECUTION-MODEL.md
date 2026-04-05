@@ -312,6 +312,26 @@ This enables skill chaining without manual intervention.
 
 Source: `runtime/src/prompt.rs:199-220`
 
+### Memory Path (CRITICAL — generators get this wrong)
+
+CC auto-loads memory from a SPECIFIC path keyed by project directory hash:
+```
+~/.claude/projects/<project-path-hash>/memory/MEMORY.md
+```
+
+Where `<project-path-hash>` is the project's absolute path with separators
+replaced by dashes. Example:
+```
+Project at:  C:\Users\doubl\projects\apps\cli-task-manager
+Memory at:   ~/.claude/projects/C--Users-doubl-projects-apps-cli-task-manager/memory/
+```
+
+**DO NOT put memory files in `<project>/memory/`.** That's a regular directory
+that CC never reads. The harness generator MUST either:
+1. Deploy to the correct `~/.claude/projects/<hash>/memory/` path, OR
+2. Document that the user needs to move them after first `claude` launch
+   (which creates the project directory)
+
 ### Auto-loading
 
 `MEMORY.md` is ALWAYS loaded into the system prompt. Every session. This is why:

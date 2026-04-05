@@ -75,7 +75,15 @@ Generate memory structure:
 - Memory file templates with proper frontmatter (name, description, type)
 - Learning loop design (observe → extract → apply → feedback)
 
-Reference: `registry/memory.json`, `templates/memory/`
+**CRITICAL — MEMORY DEPLOYMENT PATH:**
+CC auto-loads memory from `~/.claude/projects/<project-path-hash>/memory/`, NOT
+from `<project>/memory/`. The hash is the project's absolute path with path
+separators replaced by dashes (e.g., `C--Users-name-projects-my-app`).
+Generate memory FILES here in engine/output/L4-memory/, but the ASSEMBLER and
+DEPLOYER must place them at the correct ~/.claude/projects/ path. A `memory/`
+directory in the project root is INVISIBLE to CC.
+
+Reference: `registry/memory.json`, `templates/memory/`, `registry/CC-EXECUTION-MODEL.md` §6
 
 ### L5: Tools/MCP → `engine/output/L5-tools/`
 
