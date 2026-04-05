@@ -8,9 +8,12 @@ Claude Code has a companion system — a small watcher (Etcher) that observes
 conversations and comments in a speech bubble. Etcher is the user's buddy.
 Molt is Claude's buddy.
 
-**Molt** is Claude invoking the companion binary (`claude.exe.goose`) directly
-via Bash to get a fresh-context code review. Same model, no session memory,
-different perspective. Catches bugs the session-aware Claude misses.
+**Molt** is Claude invoking `claude.exe -p` (or any CC binary) via Bash to
+get a fresh-context code review. Same model, no session memory, different
+perspective. Catches bugs the session-aware Claude misses.
+
+**Note:** `claude.exe.goose` is NOT a companion binary — it's a backup from
+buddy-recon's binary patching. Molt works with any `claude` binary and `-p`.
 
 ## The Three Entities
 

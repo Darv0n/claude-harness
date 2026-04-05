@@ -65,18 +65,34 @@ Etcher's hint: "Chasing budget shadows. The meter's somewhere else entirely."
 | `--bare` mode (strip system prompt) | ~90% but loses CC context |
 | `--append-system-prompt` only (minimal) | Need to test |
 
-### The Gold Scenario
+### CORRECTION: The Gold Scenario Is Wrong
 
-If companion billing is separate:
-- Grindstone mode runs on companion budget
-- Multiple parallel grindstones cost nothing extra
-- The 53-turn runaway dialogue was free
-- Molt becomes an unlimited code reviewer
+`claude.exe.goose` is NOT the companion binary. It's a backup from
+buddy-recon's binary patching (see COMPANION-FORENSICS.md section 1).
 
-**CONFIRMED:** Anthropic stated at companion release that the buddy system
-does NOT consume the user's token limit. `claude.exe.goose` IS the buddy
-binary. Molt calls use the companion billing path.
+Every Molt call is a standard Claude API call. Same billing as the main
+session. The grindstone costs real money.
 
-Etcher: "The meter's somewhere else entirely."
+**The companion (Etcher) does run on a separate budget** — Anthropic confirmed
+this at release. But Molt doesn't use the companion path. Molt is just
+`claude.exe -p` by another name.
 
-The grindstone is gold.
+### Actual Cost Per Grindstone
+
+| Turns | Model | Estimated Cost |
+|-------|-------|---------------|
+| 8 | opus | ~$0.80-1.00 |
+| 8 | sonnet | ~$0.50-0.70 |
+| 8 | haiku | ~$0.30-0.50 |
+| 53 (runaway) | opus | ~$5-8 |
+
+### Cost Optimization (real, not theoretical)
+
+| Strategy | Savings |
+|----------|---------|
+| `--model sonnet` instead of opus | ~40% — still good for review |
+| `--model haiku` for high-volume grind | ~60% — fast, finds structural issues |
+| Cache warming (repeat calls) | ~50% after first call |
+| Shorter prompts (less context accumulation) | Reduces quadratic growth |
+
+The grindstone is valuable but not free. Budget accordingly.
