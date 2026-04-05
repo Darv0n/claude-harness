@@ -38,16 +38,20 @@ MOLT_PROMPT = (
     "If nothing's wrong, say so in one line. No filler. No praise. Just signal."
 )
 
-# Colors
-RESET = "\033[0m"
-BOLD = "\033[1m"
-DIM = "\033[2m"
-CYAN = "\033[36m"
-GREEN = "\033[32m"
-YELLOW = "\033[33m"
-RED = "\033[31m"
-WHITE = "\033[97m"
-BG_DARK = "\033[48;5;234m"
+# Colors — disabled when not in a real terminal (piped output shows raw codes)
+_TTY = hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
+if _TTY:
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+    DIM = "\033[2m"
+    CYAN = "\033[36m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
+    RED = "\033[31m"
+    WHITE = "\033[97m"
+    BG_DARK = "\033[48;5;234m"
+else:
+    RESET = BOLD = DIM = CYAN = GREEN = YELLOW = RED = WHITE = BG_DARK = ""
 
 
 def ask_molt(question: str, context: str = "") -> str:
