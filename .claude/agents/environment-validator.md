@@ -19,6 +19,9 @@ You audit generated CC environments against the capability registry and design r
 - [ ] All event types are valid (PreToolUse, PostToolUse, PostToolUseFailure, UserPromptSubmit, Stop)
 - [ ] Patterns are valid regex
 - [ ] Commands are executable
+- [ ] Every file path referenced in hook commands EXISTS on disk (resolve relative to project root)
+- [ ] ZERO absolute paths in settings.json — all paths must be relative (grep for user home dir)
+- [ ] Hook script directory in settings.json matches actual script location
 - [ ] Quality gates from decomposition all have hooks
 
 **L1 CLAUDE.md:**
@@ -48,11 +51,19 @@ You audit generated CC environments against the capability registry and design r
 - [ ] All tool names are valid CC tools
 - [ ] MCP configs have valid format
 
+### Portability Checks
+
+- [ ] ZERO absolute paths in ANY generated artifact (settings.json, scripts, agents, skills)
+- [ ] All script paths in settings.json resolve relative to project root
+- [ ] Scripts that cd to project root use `git rev-parse --show-toplevel` not hardcoded paths
+- [ ] No user-specific paths (home dir, username) in committed files
+
 ### Cross-Layer Checks
 
 - [ ] Skill → agent references resolve
 - [ ] Agent → memory path references resolve
 - [ ] Hook → skill suggestions reference existing skills
+- [ ] Hook script paths in settings.json match actual file locations (hooks/ vs scripts/ etc.)
 - [ ] Every workflow has a complete path through all layers
 - [ ] Every entity has creation + persistence points
 - [ ] Naming is consistent across layers

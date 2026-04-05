@@ -95,6 +95,21 @@ After generating all layers, wire them together:
 - CLAUDE.md references all layers
 - Data flow diagram (ASCII) showing entry points through all layers
 
+## Portability Rules (MANDATORY)
+
+- ALL paths in settings.json MUST be relative (e.g., `.claude/scripts/guard.sh` not `/home/user/project/.claude/scripts/guard.sh`)
+- ALL paths in hook scripts MUST be relative or use `git rev-parse --show-toplevel`
+- NEVER embed the user's home directory, username, or machine-specific paths in ANY generated artifact
+- Hook script directory in settings.json MUST match the actual directory scripts are written to (if you write to `scripts/`, reference `scripts/`, not `hooks/`)
+- Scripts that need to cd to project root: use `cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)"`
+
+## Single Source of Truth Rules (MANDATORY)
+
+- Agent bodies contain ONLY: persona + jobs + output format + rules UNIQUE to that agent
+- Agents must NOT restate architecture facts from CLAUDE.md — instead include "Read CLAUDE.md first" as step 1
+- Memory files must NOT restate what the code or CLAUDE.md already says — only store LEARNED patterns (feedback type) and state not derivable from code (integration status, decisions)
+- If a fact exists in the codebase, the agent reads it at runtime. It is not copied into the agent body.
+
 ## Output Structure
 
 ```
@@ -125,3 +140,7 @@ engine/output/
 - [ ] Model selection documented for each agent
 - [ ] Learning loop is complete (observe → extract → apply → feedback)
 - [ ] CLAUDE.md is self-sufficient (understandable without other docs)
+- [ ] ZERO absolute paths in any generated file (grep for home dir / username)
+- [ ] Hook script paths in settings.json match actual script locations on disk
+- [ ] No architecture facts restated in agent bodies (agents read code at runtime)
+- [ ] Memory files only contain learned patterns, not restated code facts

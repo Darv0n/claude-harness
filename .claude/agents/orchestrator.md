@@ -266,3 +266,17 @@ Present to the user:
 - Every generated skill must have 3+ trigger phrases in description.
 - Every generated CLAUDE.md must be under 4K characters.
 - Every generated environment must include a learning loop.
+
+### Portability (non-negotiable)
+- Generated artifacts must contain ZERO absolute paths. All paths relative to project root.
+- Hook script paths in settings.json MUST match the actual directory scripts are written to.
+- Scripts that cd to project root use `git rev-parse --show-toplevel`, never hardcoded paths.
+- Tell the layer-generator explicitly: "NO absolute paths. NO user home directories. ALL relative."
+- In PHASE 6 (ASSEMBLE): grep all assembled files for the user's home directory. If found, fix before delivering.
+
+### Single Source of Truth (non-negotiable)
+- Agent bodies carry ONLY persona + jobs + output format. NO restated domain facts.
+- Every agent body starts with "Read CLAUDE.md and the relevant source files first."
+- Memory files store ONLY learned patterns (feedback) and non-derivable state (integration status).
+- Memory files must NOT restate architecture, conventions, or code structure that CLAUDE.md or the code itself already describes.
+- Tell the layer-generator explicitly: "Agents derive knowledge from code at runtime. Do not copy CLAUDE.md content into agent bodies."
