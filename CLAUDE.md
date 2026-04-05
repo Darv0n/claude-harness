@@ -114,28 +114,46 @@ User drops SaaS concept
 | `layer-generator` | opus | Generates all 6 layers + cross-layer wiring | orchestrator |
 | `environment-validator` | sonnet | Validates completeness, correctness, coherence | orchestrator |
 
-## The Registry
+## The Registry + Execution Model
 
-`registry/` contains 13 JSON files — the complete CC capability database:
+`registry/` contains 13 JSON files + the CC Execution Model — the complete
+capability database AND the deep logic of how CC works internally.
 
-| File | What It Catalogs |
-|------|-----------------|
-| `tools.json` | 15+ built-in tools with schemas and permission requirements |
-| `hooks.json` | Hook events, stdin/env protocol, exit codes, design patterns |
-| `agents.json` | Agent frontmatter format, model selection guide, tool access |
-| `skills.json` | Skill format, triggering, progressive disclosure patterns |
-| `memory.json` | Memory types, MEMORY.md format, learning loop architecture |
-| `permissions.json` | 5 permission modes, granular rules, evaluation order |
-| `mcp.json` | 6 MCP transport types, OAuth, tool naming convention |
-| `plugins.json` | Plugin manifest, lifecycle, tool execution, env vars |
-| `config.json` | Complete settings.json schema, 5-level config cascade |
-| `system-prompt.json` | Prompt assembly order, instruction file limits (4K/file, 12K total) |
-| `sessions.json` | Session persistence, compaction, recovery recipes |
+**`CC-EXECUTION-MODEL.md`** is the critical file. It encodes:
+- The execution loop (user input → hooks → prompt assembly → tool calls → session persist)
+- Hook protocol (stdin JSON, env vars, exit codes, stdout → system messages)
+- Agent spawning mechanics (fresh context, tool restriction, parallel execution, inter-agent comms)
+- Permission evaluation algorithm (deny → mode → ask → allow → fallback)
+- Skill triggering (description field matching, activation patterns)
+- System prompt assembly order (CLAUDE.md is injection point at position 9)
+- Memory lifecycle (auto-loading, relevance matching, learning loops)
+- Session compaction (100K threshold, use files not conversation for persistence)
+- MCP tool bridge (namespacing, degraded mode, transport types)
+- Config cascade (User < Project < Local, validation before merge)
+- Tool-to-domain mapping decision tree
+- Agent model selection algorithm
+
+The orchestrator has this knowledge EMBEDDED, not delegated. It doesn't just tell
+sub-agents to "read the registry" — it passes the mechanical knowledge directly
+into their prompts so they generate artifacts that exploit CC at the protocol level.
+
+**JSON Registry Files:**
+
+| File | Contents |
+|------|----------|
+| `tools.json` | 15+ tools with schemas, permissions, agent access patterns |
+| `hooks.json` | Event types, stdin/env protocol, exit codes, design patterns |
+| `agents.json` | Frontmatter format, model guide, tool sets, spawning mechanics |
+| `skills.json` | Trigger description matching, progressive disclosure, composition |
+| `memory.json` | 4 types, MEMORY.md format, learning loop architecture |
+| `permissions.json` | 5 modes, granular rules, evaluation order algorithm |
+| `mcp.json` | 6 transport types, OAuth, tool naming, degraded mode |
+| `plugins.json` | Manifest, lifecycle, tool execution, env vars passed |
+| `config.json` | Complete settings.json schema, 5-level cascade |
+| `system-prompt.json` | Assembly order, injection points, char limits |
+| `sessions.json` | Persistence, compaction thresholds, recovery recipes |
 | `sandbox.json` | 3 isolation modes, container detection |
 | `commands.json` | 60+ slash commands across 10 categories |
-
-Agents MUST read relevant registry files before generating artifacts.
-The registry is the source of truth for what CC can do.
 
 ## Key Design Rules
 
