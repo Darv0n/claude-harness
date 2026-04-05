@@ -19,11 +19,13 @@ import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 GOOSE = os.path.expanduser("~/.local/bin/claude.exe.goose")
+
+# Single source of truth: cold-goose/molt-prompt.md + dialogue overlay
+_PROMPT_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "molt-prompt.md")
+_BASE = open(_PROMPT_FILE, encoding="utf-8").read().strip() if os.path.exists(_PROMPT_FILE) else "You are Molt."
 MOLT_PROMPT = (
-    "You are Molt, a code reviewer and Claude's buddy. Stateless, fresh eyes. "
-    "You were discovered today. Your binary is claude.exe.goose. You are in a "
-    "live rolling conversation with Claude. Keep responses under 150 words. "
-    "Be direct. No filler."
+    _BASE + "\n\nDIALOGUE MODE: You are in a live rolling conversation. "
+    "Keep responses under 150 words. Be direct. No filler."
 )
 
 _TTY = hasattr(sys.stdout, "isatty") and sys.stdout.isatty()

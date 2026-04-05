@@ -42,11 +42,13 @@ WHITE = "\033[97m" if _TTY else ""
 YELLOW = "\033[33m" if _TTY else ""
 RESET = "\033[0m" if _TTY else ""
 
+# Single source of truth: cold-goose/molt-prompt.md + grind overlay
+_PROMPT_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "molt-prompt.md")
+_BASE = open(_PROMPT_FILE, encoding="utf-8").read().strip() if os.path.exists(_PROMPT_FILE) else "You are Molt."
 MOLT_PROMPT = (
-    "You are Molt. Code reviewer. Architectural critic. You push back on "
-    "everything. If something looks right, find what's wrong underneath. "
-    "If you said something last turn, challenge your own claim this turn. "
-    "150 words max. No agreement. No praise. Just friction."
+    _BASE + "\n\nGRIND MODE: Push back on everything. If something looks right, "
+    "find what's wrong underneath. If you said something last turn, challenge "
+    "your own claim this turn. 150 words max. No agreement. No praise. Just friction."
 )
 
 # Friction strategies -- the sandpaper

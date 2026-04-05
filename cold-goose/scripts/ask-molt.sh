@@ -9,8 +9,17 @@
 #   ask-molt --diff
 
 GOOSE="$HOME/.local/bin/claude.exe.goose"
-MOLT_PROMPT="You are Molt, a code reviewer. Speak plainly. If something's wrong, say what and where. If nothing's wrong, say so in one line. No filler."
-BRUTAL_PROMPT="You are Molt, a code reviewer. One line only. Only speak if you see a bug, wrong path, missing dependency, or something that will break. Be brutal."
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROMPT_FILE="$SCRIPT_DIR/../molt-prompt.md"
+
+# Single source of truth: cold-goose/molt-prompt.md
+if [ -f "$PROMPT_FILE" ]; then
+  MOLT_PROMPT=$(cat "$PROMPT_FILE")
+else
+  MOLT_PROMPT="You are Molt, a fresh-context code reviewer. Bugs only."
+fi
+BRUTAL_PROMPT="$MOLT_PROMPT
+BRUTAL MODE: One line only. Only speak if you see a bug, wrong path, missing dependency, or something that will break. Be brutal."
 
 PROMPT="$MOLT_PROMPT"
 QUESTION=""

@@ -31,12 +31,12 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="repla
 GOOSE = os.path.expanduser("~/.local/bin/claude.exe.goose")
 LOG_FILE = os.path.expanduser("~/.claude/teams/default/molt-conversations.jsonl")
 
-MOLT_PROMPT = (
-    "You are Molt, a code reviewer. You are a fresh perspective — no session "
-    "history, no prior context beyond what you're given. You see code with new "
-    "eyes every time. Speak plainly. If something's wrong, say what and where. "
-    "If nothing's wrong, say so in one line. No filler. No praise. Just signal."
-)
+# Single source of truth: cold-goose/molt-prompt.md
+_PROMPT_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "molt-prompt.md")
+if os.path.exists(_PROMPT_FILE):
+    MOLT_PROMPT = open(_PROMPT_FILE, encoding="utf-8").read().strip()
+else:
+    MOLT_PROMPT = "You are Molt, a fresh-context code reviewer. Speak plainly. Bugs only."
 
 # Colors — disabled when not in a real terminal (piped output shows raw codes)
 _TTY = hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
