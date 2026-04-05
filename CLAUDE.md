@@ -4,13 +4,14 @@ Meta-engine that generates complete Claude Code operating environments for any S
 
 ## How This Works
 
-You are operating inside a Claude Code environment that generates OTHER Claude Code
-environments. When given a SaaS concept, you orchestrate a pipeline of specialized
-agents that produce a complete, deployable CC setup.
+This is an autonomous agentic cascade. When a user drops a SaaS concept, the
+`orchestrator` agent takes over and runs the ENTIRE pipeline without human
+intervention — decompose, scan, map, generate all 6 layers, validate, assemble,
+deliver. The user gets a complete, deployable CC environment back.
 
 ## Quick Start
 
-User provides a SaaS concept → you run the pipeline:
+Drop a SaaS concept and let the cascade run:
 
 ```
 /harness "LinkedIn outreach automation"
@@ -18,8 +19,19 @@ User provides a SaaS concept → you run the pipeline:
 /harness "e-commerce analytics dashboard"
 ```
 
-Or analyze coverage first: `/analyze "CRM pipeline management"`
-Or validate an existing setup: `/validate ./path/to/project/`
+The orchestrator will:
+1. Spawn decomposer + scanner in parallel
+2. Feed their output to the capability mapper
+3. Feed the map to the layer generator (produces all 6 layers)
+4. Run the validator
+5. Assemble into a deployable directory
+6. Deliver with metrics and deployment instructions
+
+No checkpoints. No manual steps. Full cascade.
+
+Other commands:
+- `/analyze "concept"` — quick coverage scan without generation
+- `/validate ./path/` — audit an existing CC environment
 
 ## The 6-Layer Architecture
 
@@ -34,42 +46,73 @@ Every generated environment has these layers:
 | L4 Memory | `.claude/projects/*/memory/` | Persistent state — entities, patterns, analytics, learning loops |
 | L5 Tools | Built-in + `.mcp.json` | Execution — tool orchestration mapped to domain operations |
 
-## Pipeline Stages
+## Agentic Cascade
 
-### Stage 1: DECOMPOSE
-Spawn `domain-decomposer` agent with the SaaS concept.
-Output: `engine/output/decomposition.md`
+```
+User drops SaaS concept
+         │
+         ▼
+┌─── ORCHESTRATOR (opus) ────────────────────────────────────┐
+│                                                             │
+│  Phase 1: DECOMPOSE + SCAN (parallel)                       │
+│  ┌──────────────────┐  ┌──────────────────┐                │
+│  │ domain-decomposer│  │integration-scanner│                │
+│  │ (opus)           │  │ (sonnet)          │                │
+│  └────────┬─────────┘  └────────┬─────────┘                │
+│           │                      │                          │
+│           ▼                      ▼                          │
+│  decomposition.md        integrations.md                    │
+│           │                      │                          │
+│  Phase 2: MAP ◀──────────────────┘                          │
+│  ┌──────────────────┐                                       │
+│  │ capability-mapper │ reads decomposition + registry       │
+│  │ (opus)           │                                       │
+│  └────────┬─────────┘                                       │
+│           │                                                 │
+│           ▼                                                 │
+│  capability-map.md                                          │
+│           │                                                 │
+│  Phase 3: GENERATE                                          │
+│  ┌──────────────────┐                                       │
+│  │ layer-generator   │ produces ALL 6 layers + wiring       │
+│  │ (opus)           │                                       │
+│  └────────┬─────────┘                                       │
+│           │                                                 │
+│           ▼                                                 │
+│  L0-hooks, L1-claude-md, L2-skills, L3-agents,             │
+│  L4-memory, L5-tools, data-flow, file-inventory             │
+│           │                                                 │
+│  Phase 4: VALIDATE                                          │
+│  ┌──────────────────┐                                       │
+│  │ env-validator     │ checks all layers + cross-refs       │
+│  │ (sonnet)          │                                       │
+│  └────────┬─────────┘                                       │
+│           │                                                 │
+│           ▼                                                 │
+│  validation-report.md                                       │
+│           │                                                 │
+│  Phase 5: ASSEMBLE + DELIVER                                │
+│  ┌──────────────────┐                                       │
+│  │ orchestrator      │ builds deployed/ dir, presents       │
+│  │ assembles output  │ metrics + deployment instructions    │
+│  └──────────────────┘                                       │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+  Complete CC Environment (ready to deploy)
+```
 
-### Stage 2: SCAN (parallel with review)
-Spawn `integration-scanner` agent.
-Output: `engine/output/integrations.md`
+## Agents
 
-### Stage 3: MAP
-Spawn `capability-mapper` agent (reads decomposition + registry + integrations).
-Output: `engine/output/capability-map.md`
-Present to user for approval before generating.
-
-### Stage 4: GENERATE
-Spawn `layer-generator` agent (reads capability map + decomposition + templates).
-Output: `engine/output/L0-L5` directories with all artifacts.
-
-### Stage 5: VALIDATE
-Spawn `environment-validator` agent.
-Output: `engine/output/validation-report.md`
-
-### Stage 6: DELIVER
-Present the complete environment with file inventory, data flow diagram,
-capability coverage metric, and deployment instructions.
-
-## Available Agents
-
-| Agent | Model | Purpose |
-|-------|-------|---------|
-| `domain-decomposer` | opus | Break SaaS concept into workflows, entities, operations |
-| `capability-mapper` | opus | Map domain ops to CC capabilities using the registry |
-| `integration-scanner` | sonnet | Find MCP servers, APIs, CLI tools for the domain |
-| `layer-generator` | opus | Generate all 6 layers from the capability map |
-| `environment-validator` | sonnet | Validate completeness, correctness, cross-layer coherence |
+| Agent | Model | Role | Spawned By |
+|-------|-------|------|------------|
+| `orchestrator` | opus | Conducts the full cascade autonomously | `/harness` skill |
+| `domain-decomposer` | opus | Breaks SaaS into workflows, entities, operations | orchestrator |
+| `integration-scanner` | sonnet | Finds MCP servers, APIs, CLI tools | orchestrator |
+| `capability-mapper` | opus | Maps domain ops → CC capabilities via registry | orchestrator |
+| `layer-generator` | opus | Generates all 6 layers + cross-layer wiring | orchestrator |
+| `environment-validator` | sonnet | Validates completeness, correctness, coherence | orchestrator |
 
 ## The Registry
 
@@ -117,16 +160,18 @@ layers wired together. Use this as the quality bar for generated output.
 ```
 claude-harness/
 ├── .claude/
-│   ├── agents/           # Operational agents (CC discovers these)
-│   │   ├── domain-decomposer.md
-│   │   ├── capability-mapper.md
-│   │   ├── integration-scanner.md
-│   │   ├── layer-generator.md
-│   │   └── environment-validator.md
-│   └── skills/           # Slash commands (CC discovers these)
-│       ├── harness.md    # /harness — full generation pipeline
-│       ├── analyze.md    # /analyze — coverage analysis
-│       └── validate.md   # /validate — environment audit
+│   ├── agents/           # Operational agents (CC auto-discovers)
+│   │   ├── orchestrator.md         # THE conductor — runs full cascade
+│   │   ├── domain-decomposer.md    # Phase 1: decompose SaaS concept
+│   │   ├── capability-mapper.md    # Phase 2: map to CC capabilities
+│   │   ├── integration-scanner.md  # Phase 1b: scan for MCP/APIs
+│   │   ├── layer-generator.md      # Phase 3: generate all 6 layers
+│   │   └── environment-validator.md # Phase 4: validate everything
+│   ├── skills/           # Slash commands (CC auto-discovers)
+│   │   ├── harness.md    # /harness — spawns orchestrator for full cascade
+│   │   ├── analyze.md    # /analyze — quick coverage scan
+│   │   └── validate.md   # /validate — audit existing environment
+│   └── settings.json     # Hooks: auto-detect SaaS concepts, post-agent notifications
 ├── registry/             # CC capability database (13 JSON files)
 ├── engine/
 │   ├── analyzers/        # Agent design docs

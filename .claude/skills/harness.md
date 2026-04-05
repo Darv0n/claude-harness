@@ -9,60 +9,26 @@ description: |
 
 # /harness [SaaS concept]
 
-Generate a complete Claude Code operating environment for the given SaaS concept.
+Generate a complete Claude Code operating environment autonomously.
 
-## Pipeline
+## Execution
 
-Execute these stages in order using the Agent tool:
+1. Clean any previous output: delete contents of `engine/output/` if present
+2. Spawn the `orchestrator` agent with the user's SaaS concept
+3. The orchestrator runs the FULL pipeline autonomously:
+   - DECOMPOSE + SCAN (parallel) → domain decomposition + integration scan
+   - MAP → capability mapping against the registry
+   - GENERATE → all 6 layers (hooks, CLAUDE.md, skills, agents, memory, tools/MCP)
+   - VALIDATE → completeness, correctness, cross-layer coherence
+   - ASSEMBLE → deployment-ready directory structure
+   - DELIVER → present results with metrics and deployment instructions
+4. No human checkpoints until final delivery
 
-### Stage 1: DECOMPOSE + SCAN (parallel)
-Spawn TWO agents simultaneously:
-1. `domain-decomposer` — pass the SaaS concept description. Tell it to read the registry
-   files and write output to `engine/output/decomposition.md`.
-2. `integration-scanner` — pass the SaaS concept. Tell it to write output to
-   `engine/output/integrations.md`.
+## Agent Prompt
 
-Wait for both. Present the decomposition to the user for review.
+When spawning the orchestrator, pass it:
+- The SaaS concept (user's exact words)
+- The absolute path to this project directory (so it can find registry/, templates/, examples/)
+- Instruction to run the full cascade without stopping
 
-### Stage 2: MAP
-After user approves decomposition, spawn `capability-mapper`. Tell it:
-- Read `engine/output/decomposition.md` and `engine/output/integrations.md`
-- Read all `registry/*.json` files for CC capabilities
-- Write output to `engine/output/capability-map.md`
-
-Present the capability map. This is the blueprint — get user approval.
-
-### Stage 3: GENERATE
-Spawn `layer-generator`. Tell it:
-- Read `engine/output/capability-map.md` and `engine/output/decomposition.md`
-- Read all `registry/*.json` files and `templates/` directory
-- Study `examples/linkedin-outreach/` as the quality reference
-- Generate ALL 6 layers to `engine/output/` subdirectories
-- Wire cross-layer references and generate data flow diagram
-
-### Stage 4: VALIDATE
-Spawn `environment-validator`. Tell it:
-- Read all generated artifacts in `engine/output/`
-- Read `registry/*.json` for constraint validation
-- Write validation report to `engine/output/validation-report.md`
-
-### Stage 5: DELIVER
-Read the validation report. If READY:
-1. Present complete file inventory with layer assignments
-2. Show the data flow diagram
-3. Report capability coverage metric
-4. Ask if user wants to deploy to a target project directory
-
-If NEEDS_WORK:
-1. Present specific issues
-2. Ask user how to proceed (fix and regenerate, or accept as-is)
-
-## Deploying Generated Environments
-
-When user provides a target directory:
-1. Create `.claude/agents/` and `.claude/skills/` directories in target
-2. Copy generated agents, skills, and memory structure
-3. Write the generated CLAUDE.md to target root
-4. Write settings.json with hooks
-5. Write .mcp.json if MCP servers are needed
-6. Report what was deployed
+The orchestrator knows what to do — it reads CLAUDE.md and the registry on boot.

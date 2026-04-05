@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "(?i)(saas|platform|automation|pipeline|dashboard|outreach|crm|erp|analytics|incident|devops|e-commerce|marketplace|booking|scheduling|support|helpdesk|onboarding|billing|invoicing|recruiting|hr\\s|sales\\s|marketing\\s)",
+        "command": "echo '[HARNESS] SaaS concept detected. Use /harness to generate a complete CC environment, or /analyze for a quick coverage scan.'"
+      },
+      {
+        "matcher": "(?i)(build me|generate|create|set up|scaffold).*(environment|system|operating|harness|cc env|claude code)",
+        "command": "echo '[HARNESS] Environment generation request detected. Spawning the orchestrator for full autonomous cascade.'"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Agent",
+        "command": "echo '[HARNESS] Agent completed. Check engine/output/ for artifacts.'"
+      }
+    ]
+  }
+}
