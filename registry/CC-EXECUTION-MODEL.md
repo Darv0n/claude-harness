@@ -159,19 +159,57 @@ When Claude calls the Agent tool:
 }
 ```
 
-**What happens internally:**
+**What happens internally (source-verified from lib.rs:3035-3080):**
 1. A new Worker is created in WorkerRegistry
 2. Worker status: `Created → Ready → Running → Completed|Failed`
 3. Trust resolution runs (TrustPolicy evaluates)
 4. A NEW conversation is started with fresh context
-5. The agent's `.md` file body becomes part of the system prompt
-6. The agent can ONLY use tools listed in its frontmatter `tools:` field
-7. The agent runs independently — it has NO access to the parent conversation
+5. System prompt is built via `build_agent_system_prompt()` — this loads the
+   standard system prompt + appends "You are a background sub-agent of type X"
+6. Tool access is determined by `allowed_tools_for_subagent()` — a HARDCODED
+   match statement. Unknown types get the default set (bash, read, write, edit,
+   glob, grep, web, todo, skill, toolsearch, notebook, etc.)
+7. The agent runs independently — NO access to the parent conversation
 
-**CRITICAL IMPLICATIONS FOR GENERATED ENVIRONMENTS:**
+**CRITICAL: HOW subagent_type ACTUALLY RESOLVES (lib.rs:3857-3874):**
+```rust
+fn normalize_subagent_type(subagent_type: Option<&str>) -> String {
+    match canonical_tool_token(trimmed).as_str() {
+        "explore" => "Explore",
+        "plan" => "Plan",
+        "verification" => "Verification",
+        "clawguide" => "claw-guide",
+        "statusline" => "statusline-setup",
+        _ => trimmed.to_string(),  // UNKNOWN TYPES PASS THROUGH AS-IS
+    }
+}
+```
+
+**In claw-code:** subagent_type is a label, NOT a file lookup. The system prompt
+is generic + type label. Tool access is from a hardcoded match or the default set.
+`.claude/agents/*.md` files are NOT loaded as system prompts via subagent_type.
+
+**In the CC product:** Custom agents ARE supported via the plugin system. Agents
+from `.claude/agents/*.md` are registered through plugin discovery and appear as
+available `subagent_type` values. The CC product extends claw-code's mechanism.
+
+**SAFE PATTERN FOR THE HARNESS:**
+Do NOT rely on subagent_type resolving to .md files. Instead:
+1. READ the .md file yourself (the orchestrator reads it)
+2. EXTRACT the body (the agent's persona/instructions)
+3. PACK it into the `prompt` parameter (agent sees it as task instructions)
+4. Set `model` from the frontmatter explicitly
+5. The .md files are PROMPT TEMPLATES the orchestrator reads and uses
+
+This is MORE powerful — you control exactly what the agent sees, and it works
+regardless of whether the platform resolves .md files or not.
+
+**IMPLICATIONS FOR GENERATED ENVIRONMENTS:**
 - Agent prompts must be COMPLETE — include ALL context the agent needs
 - Agents cannot reference "the conversation so far" — they start fresh
-- Tool access is RESTRICTIVE — only listed tools work
+- For generated environments, the .md files serve dual purpose:
+  - CC product may discover them automatically (if plugin system resolves them)
+  - The orchestrator/skills can always READ and PACK them as a fallback
 - Model selection affects cost AND capability
 - `run_in_background: true` enables parallel execution
 - `name` parameter enables `SendMessage` for inter-agent communication

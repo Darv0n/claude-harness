@@ -82,14 +82,42 @@ When a new target appears:
 | Parallel agent spawning | Multiple Agent calls in one message | Decompose work into independent chunks, spawn simultaneously |
 | Named agent messaging | SendMessage to addressable name | Create agent pipelines where output of one feeds input of next |
 
+## Grounded vs Assumed (read registry/ABSTRACTION-AUDIT.md for full details)
+
+**SOURCE-VERIFIED (from claw-code):**
+- Hook stdin JSON protocol + env vars + exit codes (hooks.rs:414-479)
+- Permission evaluation order: deny → mode → ask → allow → fallback
+- Agent spawning creates fresh context, tool access from hardcoded match
+- Session compaction at ~100K tokens
+- Config cascade: User < Project < Local, validation before merge
+- 3 hook events: PreToolUse, PostToolUse, PostToolUseFailure
+
+**RUNTIME-OBSERVED (CC product, not in claw-code source):**
+- UserPromptSubmit and Stop hook events (work but protocol assumed)
+- `.claude/agents/*.md` auto-discovery via plugin system
+- `matcher`/`pattern` field in settings.json hook config
+- Skill description matching algorithm (semantic vs keyword unknown)
+
+**CRITICAL PATTERN — AGENT RESOLUTION:**
+Do NOT assume `subagent_type` resolves `.claude/agents/*.md` files.
+The orchestrator READS agent .md files and PACKS their body into the
+`prompt` parameter. This works regardless of platform resolution.
+
+**CRITICAL PATTERN — HOOK SELF-FILTERING:**
+Hook scripts check `HOOK_TOOL_NAME` env var INTERNALLY rather than
+depending on `matcher` routing in settings.json. Works on both
+claw-code format (flat command arrays) and CC product format (objects).
+
 ## Quality Gates
 
 Before any artifact ships:
-- [ ] Hook scripts receive and parse stdin JSON correctly
+- [ ] Hook scripts are SELF-FILTERING (check env vars, don't depend on matcher)
+- [ ] Hook scripts parse stdin JSON correctly with fallback to env vars
+- [ ] Agent .md files are treated as PROMPT TEMPLATES (orchestrator reads + packs)
 - [ ] Agent frontmatter has model + tools + description with 3+ triggers
 - [ ] Skills have description field with example phrases
 - [ ] CLAUDE.md is under 4,000 characters
-- [ ] Memory files have valid frontmatter (name, description, type)
+- [ ] Memory lives at correct CC path (~/.claude/projects/<hash>/memory/)
 - [ ] All cross-layer references resolve
 - [ ] Permission rules use correct tool:pattern format
 - [ ] Learning loop has all 4 stages (observe, extract, apply, feedback)

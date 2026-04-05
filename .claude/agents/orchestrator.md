@@ -78,26 +78,36 @@ Store the absolute project path — you'll need it for agent prompts.
 
 ### PHASE 2: DECOMPOSE + SCAN (parallel)
 
+**CRITICAL**: Do NOT rely on `subagent_type` to magically load agent .md files.
+The Agent tool's `subagent_type` maps to built-in types (Explore, Plan, etc.) and
+plugin-registered agents — NOT to raw .md files in .claude/agents/. Instead:
+1. READ the agent .md file yourself (e.g., `.claude/agents/domain-decomposer.md`)
+2. Extract the body content (everything after the frontmatter closing `---`)
+3. PACK the body into the `prompt` parameter along with the task-specific instructions
+4. Set `model` explicitly from the frontmatter
+5. The .md files are PROMPT TEMPLATES, not auto-resolved configs
+
 Spawn TWO background agents simultaneously:
 
-**Agent 1 — Decomposer** (opus, tools: Read, Write, WebSearch, WebFetch):
-Include in the prompt:
-- The exact SaaS concept (user's words)
-- The absolute path to `registry/` so it can read capability files
-- The absolute output path: `{project}/engine/output/decomposition.md`
-- Instruction to produce: overview, core value loop, workflows (with triggers,
-  steps, decision points, outputs, quality criteria), entities (with fields,
-  lifecycle states, relationships), operations table (with complexity tier),
-  triggers table, ASCII state machine for primary workflow, quality criteria table
-- Tell it: "Think about what PERSISTS (memory), what TRIGGERS (hooks), what
-  requires EXPERTISE (agents), what is USER-FACING (skills), what is DOMAIN
-  KNOWLEDGE (CLAUDE.md). These map to CC's 6 layers."
+**Agent 1 — Decomposer**:
+1. Read `.claude/agents/domain-decomposer.md`
+2. Spawn Agent with:
+   - `model: "opus"`
+   - `prompt`: The .md body content + the SaaS concept + absolute registry paths +
+     output path `{project}/engine/output/decomposition.md` + instruction to produce
+     workflows, entities, operations, triggers, state machine, quality criteria +
+     "Think about what PERSISTS (memory), TRIGGERS (hooks), needs EXPERTISE (agents),
+     is USER-FACING (skills), is DOMAIN KNOWLEDGE (CLAUDE.md)"
+   - `run_in_background: true`
+   - `name: "decomposer"`
 
-**Agent 2 — Scanner** (sonnet, tools: Read, Write, WebSearch, WebFetch):
-Include in the prompt:
-- The SaaS domain
-- Instruction to search for MCP servers, APIs, CLI tools
-- The absolute output path: `{project}/engine/output/integrations.md`
+**Agent 2 — Scanner**:
+1. Read `.claude/agents/integration-scanner.md`
+2. Spawn Agent with:
+   - `model: "sonnet"`
+   - `prompt`: The .md body + domain + search instructions + output path
+   - `run_in_background: true`
+   - `name: "scanner"`
 
 Wait for BOTH. Read both outputs to verify they exist and are substantive.
 
