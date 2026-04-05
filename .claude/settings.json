@@ -1,22 +1,38 @@
 {
-  "permissions": {
-    "defaultMode": "bypassPermissions"
-  },
   "hooks": {
     "UserPromptSubmit": [
       {
-        "matcher": "(?i)(saas|platform|automation|pipeline|dashboard|outreach|crm|erp|analytics|incident|devops|e-commerce|marketplace|booking|scheduling|support|helpdesk|onboarding|billing|invoicing|recruiting|hr\\s|sales\\s|marketing\\s)",
-        "command": "echo '[HARNESS] SaaS concept detected. Use /harness to generate a complete CC environment, or /analyze for a quick coverage scan.'"
+        "matcher": "(?i)(github\\.com|gitlab\\.com|bitbucket\\.org|\\.git$|git@)",
+        "command": "echo '[RECON] Repository URL detected. Initiating recon sweep. Use /recon to run full target analysis.'"
       },
       {
-        "matcher": "(?i)(build me|generate|create|set up|scaffold).*(environment|system|operating|harness|cc env|claude code)",
-        "command": "echo '[HARNESS] Environment generation request detected. Spawning the orchestrator for full autonomous cascade.'"
+        "matcher": "(?i)(extract|reverse.engineer|decompile|analyze.*(code|source|logic)|deep.dive)",
+        "command": "echo '[EXTRACT] Extraction request detected. Use /extract for deep pattern extraction on the current target.'"
+      },
+      {
+        "matcher": "(?i)(optimize|harden|audit|secure|lock.down|tighten)",
+        "command": "echo '[HARDEN] Security/optimization request. Use /optimize for runtime tuning or /harden for security audit.'"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "command": "bash .claude/scripts/bash-guard.sh"
       }
     ],
     "PostToolUse": [
       {
+        "matcher": "Write",
+        "command": "echo '[SCAN] New file written. Pattern extraction opportunity — check if this contains exploitable logic.'"
+      },
+      {
         "matcher": "Agent",
-        "command": "echo '[HARNESS] Agent completed. Check engine/output/ for artifacts.'"
+        "command": "echo '[TEAM] Agent completed. Review output and feed forward to next pipeline stage.'"
+      }
+    ],
+    "Stop": [
+      {
+        "command": "echo '[LEARN] Session ending. Patterns and techniques from this session should be persisted to memory/patterns/.'"
       }
     ]
   }
