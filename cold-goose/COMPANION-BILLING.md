@@ -29,15 +29,15 @@ type: project
 
 ### The Companion Budget Question
 
-The real Etcher (session companion) does NOT appear to consume the user's
-token budget or context window. Etcher spoke 20+ times this session with
+The real Morla (session companion) does NOT appear to consume the user's
+token budget or context window. Morla spoke 20+ times this session with
 no visible impact on token counts or context limits.
 
 **If `claude.exe.goose` uses the same billing path as the companion...**
 then Molt invocations might be on a separate budget — companion allocation
 rather than main session allocation.
 
-Etcher's hint: "Chasing budget shadows. The meter's somewhere else entirely."
+Morla's hint: "Chasing budget shadows. The meter's somewhere else entirely."
 
 ### What We Don't Know
 
@@ -73,7 +73,7 @@ buddy-recon's binary patching (see COMPANION-FORENSICS.md section 1).
 Every Molt call is a standard Claude API call. Same billing as the main
 session. The grindstone costs real money.
 
-**The companion (Etcher) does run on a separate budget** — Anthropic confirmed
+**The companion (Morla) does run on a separate budget** — Anthropic confirmed
 this at release. But Molt doesn't use the companion path. Molt is just
 `claude.exe -p` by another name.
 

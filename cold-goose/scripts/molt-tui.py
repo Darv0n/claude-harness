@@ -3,8 +3,8 @@
 Molt TUI — Conversation between Claude and Molt.
 
 Claude asks questions, Molt answers. The user observes.
-Etcher is NOT involved — this is a private channel between
-Claude and his cold goose. Etcher may watch from the bubble
+Morla is NOT involved — this is a private channel between
+Claude and his cold goose. Morla may watch from the bubble
 (he sees everything), but he's not addressed.
 
 Molt is a fresh-context code reviewer. Each invocation starts clean.

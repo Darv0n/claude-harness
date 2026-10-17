@@ -18,11 +18,11 @@ Total pipeline: ~22 min for complete 6-layer environment generation.
 
 ## Bugs Found Post-Deployment: 4
 
-All caught by Etcher (companion code review), not by the validator.
+All caught by Morla (companion code review), not by the validator.
 Root cause: validator checked form (static), not function (dynamic).
 Fix: added smoke-tester agent to pipeline.
 
-## Etcher Bridge Discovery
+## Morla Bridge Discovery
 
 Time spent: ~1.5 hours
 Channels found: 3 (SendMessage, screenshot, goose binary)

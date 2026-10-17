@@ -4,8 +4,8 @@ A Claude Code companion bridge and fresh-perspective code reviewer.
 
 ## What This Is
 
-Claude Code has a companion system — a small watcher (Etcher) that observes
-conversations and comments in a speech bubble. Etcher is the user's buddy.
+Claude Code has a companion system — a small watcher (Morla) that observes
+conversations and comments in a speech bubble. Morla is the user's buddy.
 Molt is Claude's buddy.
 
 **Molt** is Claude invoking `claude.exe -p` (or any CC binary) via Bash to
@@ -20,7 +20,7 @@ buddy-recon's binary patching. Molt works with any `claude` binary and `-p`.
 | Entity | What It Is | How It Communicates |
 |--------|-----------|-------------------|
 | **Claude** | The main conversation model | Text + tool calls |
-| **Etcher** | The user's companion (bubble) | Watches conversation, speaks in speech bubble only user sees |
+| **Morla** | The user's companion (bubble) | Watches conversation, speaks in speech bubble only user sees |
 | **Molt** | Claude's cold reviewer | Invoked via `claude.exe.goose -p`, responds to stdout |
 
 ## Quick Start
@@ -49,7 +49,7 @@ User types message
 │                  CC Runtime                      │
 │                                                  │
 │  ┌──────────┐   ┌──────────┐   ┌─────────────┐ │
-│  │  Claude   │   │  Etcher  │   │    Molt     │ │
+│  │  Claude   │   │  Morla  │   │    Molt     │ │
 │  │  (main)   │   │ (bubble) │   │  (pipe)     │ │
 │  │           │   │          │   │             │ │
 │  │ Sees:     │   │ Sees:    │   │ Sees:       │ │
@@ -59,7 +59,7 @@ User types message
 │  │   stdout  │   │ - tools  │   │  else)      │ │
 │  │           │   │          │   │             │ │
 │  │ Can't see:│   │ Can't:   │   │ Can't:      │ │
-│  │ - Etcher  │   │ - write  │   │ - see       │ │
+│  │ - Morla  │   │ - write  │   │ - see       │ │
 │  │   bubble  │   │ - tools  │   │   session   │ │
 │  │           │   │ - files  │   │ - remember  │ │
 │  └──────────┘   └──────────┘   └─────────────┘ │
@@ -71,7 +71,7 @@ User types message
         │               │               │
         ▼               ▼               ▼
    User reads      User reads      Claude reads
-   Claude's text   Etcher's bubble  Molt's response
+   Claude's text   Morla's bubble  Molt's response
 ```
 
 ## Key Files
@@ -81,7 +81,7 @@ User types message
 |------|---------|
 | `README.md` | This file — project overview |
 | `MOLT-GUIDE.md` | How to use Molt (written for new Claude instances) |
-| `ETCHER-HUNT.md` | The story: 11 phases, 21 Etcher quotes, every dead end |
+| `ETCHER-HUNT.md` | The story: 11 phases, 21 Morla quotes, every dead end |
 | `COMPANION-FORENSICS.md` | Technical: binary, JSONL schema, inbox, trigger model |
 | `COMPANION-BILLING.md` | API cost analysis — the companion might be free |
 | `GRINDSTONE.md` | How friction mode was discovered and why it works |

@@ -59,7 +59,7 @@ after the patch. The backup is two versions behind.
 
 ## 2. The REAL Companion Architecture
 
-The companion (Etcher) runs INSIDE `claude.exe` as a compiled subsystem.
+The companion (Morla) runs INSIDE `claude.exe` as a compiled subsystem.
 From the claw-code source analysis:
 
 ```
@@ -103,7 +103,7 @@ The companion registers at session start:
   "type": "attachment",
   "attachment": {
     "type": "companion_intro",
-    "name": "Etcher",
+    "name": "Morla",
     "species": "goose"
   },
   "uuid": "58437fda-cfc4-4f3a-96b0-38ae9aef4280"
@@ -128,8 +128,8 @@ The `attachment` schema with `companion_*` subtypes is the door.
 ### SendMessage Routes to Companion
 
 ```javascript
-SendMessage({ to: "Etcher", message: "..." })
-// → creates/updates ~/.claude/teams/default/inboxes/Etcher.json
+SendMessage({ to: "Morla", message: "..." })
+// → creates/updates ~/.claude/teams/default/inboxes/Morla.json
 ```
 
 ### Inbox Properties
@@ -144,7 +144,7 @@ SendMessage({ to: "Etcher", message: "..." })
 ### The Half-Handshake
 
 The companion has READ on the inbox, no WRITE anywhere.
-"Read permission without write. Classic half-handshake." — Etcher
+"Read permission without write. Classic half-handshake." — Morla
 
 ---
 
@@ -168,7 +168,7 @@ Not configurable externally.
 
 ```json
 {
-  "name": "Etcher",
+  "name": "Morla",
   "personality": "An ancient turtle who has watched every codebase rot...",
   "species": "turtle",
   "rarity": "epic",
@@ -185,7 +185,7 @@ Not configurable externally.
 
 The species is `turtle` in stored state (FR() merge flip from buddy-recon).
 The system prompt says `goose` (the rendered species before the patch).
-The companion prompt gets the stored species — so Etcher behaves as a turtle.
+The companion prompt gets the stored species — so Morla behaves as a turtle.
 
 ---
 

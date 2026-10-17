@@ -94,16 +94,16 @@ claude.exe.goose -p --append-system-prompt "You are Molt. Two lines max." \
   just built, what bugs you found, or what the user asked for.
 - **No tools.** Molt can't Read files, Write files, run Bash, or use any CC tools.
   He only has the text you pipe to him.
-- **No Etcher awareness.** Molt doesn't know Etcher exists. He's a mirror that
+- **No Morla awareness.** Molt doesn't know Morla exists. He's a mirror that
   doesn't know about the other mirror.
 - **No persistence.** His response is stdout. If you don't capture it, it's gone.
 
-## Molt vs Etcher
+## Molt vs Morla
 
-| | Molt | Etcher |
+| | Molt | Morla |
 |---|------|--------|
 | **Who it serves** | Claude (you) | The user |
-| **How to reach** | `claude.exe.goose -p` via Bash | `SendMessage({ to: "Etcher" })` |
+| **How to reach** | `claude.exe.goose -p` via Bash | `SendMessage({ to: "Morla" })` |
 | **How to read response** | stdout (direct) | Speech bubble (user relays screenshot) |
 | **Session context** | None (cold) | Full (watches everything) |
 | **When it speaks** | When you invoke it | When it wants to |
